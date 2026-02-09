@@ -1,0 +1,228 @@
+{
+  "project": "Portfolio CMS",
+  "branchName": "flow/portfolio-cms",
+  "description": "Full-featured portfolio website with Supabase backend, Cloudinary media hosting, and Firebase analytics",
+
+  "relatedPRDs": [],
+
+  "consolidatedMemory": "",
+
+  "lessonsLearned": "# Lessons Learned from Initial Setup\n\n## Tech Stack\n- Framework: Next.js 16 with App Router and React 19\n- Package Manager: pnpm\n- UI: shadcn/ui with Radix UI components\n- Styling: Tailwind CSS v4 with custom animations\n- Analytics: Vercel Analytics already integrated\n- 3D: @react-three/fiber available for potential 3D elements\n\n## Architecture\n- Project structure: app/, components/, data/, hooks/, lib/, types/\n- Server Components + Client Components pattern\n- RSC-based data fetching approach\n\n## Notes\n- No existing PRDs found - this is the initial feature\n- This feature establishes foundational patterns for future features\n\n## MCP Status\n- No MCP servers currently configured in environment\n- PRD includes MCP assignments for when servers are added",
+
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Supabase Database Schema & Client Setup",
+      "description": "As a developer, I want to set up the Supabase database schema and client configuration so that the portfolio can store and retrieve dynamic content.",
+      "acceptanceCriteria": [
+        "Create .env.local file with Supabase credentials (project ID: njcggtsozmjhvladuznw)",
+        "Set up Supabase client in lib/supabase/client.ts for client components",
+        "Set up Supabase server client in lib/supabase/server.ts for RSC",
+        "Create projects table with id, title, description, slug, tags, images, demo_url, repo_url, featured, created_at, updated_at, published_at",
+        "Create posts table with id, title, slug, content, excerpt, cover_image, tags, published, created_at, updated_at, published_at",
+        "Create contacts table with id, name, email, message, created_at, read",
+        "Enable Row Level Security (RLS) policies",
+        "Create TypeScript types from database schema",
+        "Typecheck passes"
+      ],
+      "mavenSteps": [1, 2, 7],
+      "mcpTools": {
+        "step2": [],
+        "step7": []
+      },
+      "priority": 1,
+      "passes": true,
+      "notes": "NOTE: supabase MCP not currently configured - add when available"
+    },
+    {
+      "id": "US-002",
+      "title": "Cloudinary Media Integration",
+      "description": "As a content creator, I want to upload and manage images through Cloudinary so that media is optimized and delivered efficiently.",
+      "acceptanceCriteria": [
+        "Add Cloudinary credentials to .env.local (cloud_name: dszboz3se, api_key: 293868987781493)",
+        "Install next-cloudinary package",
+        "Configure Cloudinary in lib/cloudinary.ts",
+        "Create components/media-upload.tsx with Cloudinary upload widget",
+        "Implement image optimization component components/optimized-image.tsx",
+        "Add helper functions for image transformations (resize, crop, format)",
+        "Test image upload and delivery",
+        "Typecheck passes"
+      ],
+      "mavenSteps": [1, 2, 9],
+      "mcpTools": {},
+      "priority": 2,
+      "passes": true,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Dynamic Projects Display",
+      "description": "As a visitor, I want to browse projects dynamically loaded from the database so that new projects can be added without code changes.",
+      "acceptanceCriteria": [
+        "Create app/projects/page.tsx listing all projects",
+        "Create app/projects/[slug]/page.tsx for individual project pages",
+        "Fetch projects from Supabase in server components",
+        "Implement filtering by tags",
+        "Add search functionality",
+        "Display project images from Cloudinary",
+        "Implement pagination or infinite scroll for many projects",
+        "Add featured section on homepage",
+        "SEO metadata for each project page",
+        "Verify in browser",
+        "Typecheck passes"
+      ],
+      "mavenSteps": [1, 3, 5, 7],
+      "mcpTools": {
+        "step7": []
+      },
+      "priority": 3,
+      "passes": true,
+      "notes": "NOTE: supabase MCP not currently configured - add when available"
+    },
+    {
+      "id": "US-004",
+      "title": "Blog System with Markdown Support",
+      "description": "As a visitor, I want to read blog posts stored in the database so that content can be managed dynamically.",
+      "acceptanceCriteria": [
+        "Create app/blog/page.tsx listing all published posts",
+        "Create app/blog/[slug]/page.tsx for individual posts",
+        "Store post content as Markdown in Supabase",
+        "Implement Markdown rendering with syntax highlighting",
+        "Add reading time calculation",
+        "Display cover images from Cloudinary",
+        "Implement tag filtering",
+        "Add related posts section",
+        "SEO metadata for blog posts",
+        "RSS feed generation",
+        "Verify in browser",
+        "Typecheck passes"
+      ],
+      "mavenSteps": [1, 3, 5, 7],
+      "mcpTools": {
+        "step3": [],
+        "step5": [],
+        "step7": []
+      },
+      "priority": 4,
+      "passes": true,
+      "notes": "Step 3 complete - Feature-based structure verified. Blog follows same pattern as projects feature."
+    },
+    {
+      "id": "US-005",
+      "title": "Contact Form with Database Storage",
+      "description": "As a visitor, I want to submit a contact form so that I can reach out to the portfolio owner.",
+      "acceptanceCriteria": [
+        "Create contact form component with validation (Zod schema)",
+        "Store submissions in Supabase contacts table",
+        "Implement rate limiting to prevent spam",
+        "Add success/error feedback with toast notifications",
+        "Create admin view to read contact submissions (optional authentication)",
+        "CSRF protection",
+        "Sanitize input to prevent XSS",
+        "Verify in browser",
+        "Typecheck passes"
+      ],
+      "mavenSteps": [1, 3, 5, 7, 10],
+      "mcpTools": {
+        "step7": []
+      },
+      "priority": 5,
+      "passes": false,
+      "notes": "NOTE: supabase MCP not currently configured - add when available"
+    },
+    {
+      "id": "US-006",
+      "title": "Firebase Analytics Integration",
+      "description": "As a site owner, I want to track visitor behavior through Firebase Analytics so that I can understand user engagement.",
+      "acceptanceCriteria": [
+        "Install Firebase SDK (firebase, @firebase/analytics)",
+        "Add Firebase config to .env.local (measurementId: G-7JKKPGB41D)",
+        "Initialize Firebase in lib/firebase.ts",
+        "Add page view tracking",
+        "Track project clicks events",
+        "Track blog post views events",
+        "Track contact form submission events",
+        "Track external link clicks events",
+        "Track search queries",
+        "Implement consent banner for GDPR compliance",
+        "Typecheck passes"
+      ],
+      "mavenSteps": [1, 2, 9],
+      "mcpTools": {},
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Real-time Content Updates",
+      "description": "As a content manager, I want to see content updates immediately without refreshing so that I can preview changes in real-time.",
+      "acceptanceCriteria": [
+        "Enable Supabase real-time on projects and posts tables",
+        "Implement real-time subscriptions for project list",
+        "Implement real-time subscriptions for blog list",
+        "Add optimistic UI updates",
+        "Show content updated indicator",
+        "Handle connection states",
+        "Debounce rapid updates",
+        "Verify in browser",
+        "Typecheck passes"
+      ],
+      "mavenSteps": [1, 7, 9],
+      "mcpTools": {
+        "step7": []
+      },
+      "priority": 7,
+      "passes": false,
+      "notes": "NOTE: supabase MCP not currently configured - add when available"
+    },
+    {
+      "id": "US-008",
+      "title": "SEO Optimization & Metadata",
+      "description": "As a site owner, I want proper SEO so that the portfolio ranks well in search engines.",
+      "acceptanceCriteria": [
+        "Dynamic metadata for all pages",
+        "Open Graph tags for social sharing",
+        "Twitter Card meta tags",
+        "Structured data (JSON-LD) for project pages",
+        "Structured data (JSON-LD) for blog posts",
+        "Structured data (JSON-LD) for profile/schema.org",
+        "Generate dynamic sitemap",
+        "Generate robots.txt",
+        "Add canonical URLs",
+        "Implement breadcrumb navigation",
+        "Typecheck passes"
+      ],
+      "mavenSteps": [1, 3],
+      "mcpTools": {},
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Content Management Interface (Optional Admin)",
+      "description": "As an admin, I want a simple interface to manage content so that I don't need to use the Supabase dashboard directly.",
+      "acceptanceCriteria": [
+        "Create admin layout at app/admin/layout.tsx",
+        "Implement password protection (environment variable)",
+        "Create project CRUD interface",
+        "Create post CRUD interface with Markdown editor",
+        "Add image upload integration with Cloudinary",
+        "Implement draft/published status",
+        "Add bulk actions (delete, publish)",
+        "Content preview mode",
+        "Verify in browser",
+        "Typecheck passes"
+      ],
+      "mavenSteps": [1, 3, 5, 7, 8],
+      "mcpTools": {
+        "step7": [],
+        "step8": []
+      },
+      "priority": 9,
+      "passes": false,
+      "notes": "NOTE: supabase MCP not currently configured - add when available"
+    }
+  ]
+}

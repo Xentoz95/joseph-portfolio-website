@@ -1,0 +1,119 @@
+---
+memoryVersion: 1
+schemaVersion: 1
+storyId: US-003
+storyTitle: Dynamic Projects Display
+feature: Portfolio CMS
+completedDate: 2026-02-04
+agents: development-agent
+---
+
+# Story US-003: Dynamic Projects Display
+
+## Implemented
+
+### Database & Migration
+- Created `lib/migrate-projects.ts` - Migration script for projects
+- **16/16 project images uploaded to Cloudinary successfully**
+- Created `scripts/setup-database.sql` - Database setup script
+- Created `lib/check-db.ts` - Database verification helper
+
+### New Pages Created
+1. **`app/projects/page.tsx`** - Projects listing page
+   - Server component fetching all projects from Supabase
+   - Tag filtering via URL params (?tag=web)
+   - Search functionality (?search=query)
+   - Responsive grid layout
+   - Results count display
+   - Empty state handling
+
+2. **`app/projects/[slug]/page.tsx`** - Individual project pages
+   - Dynamic routing by slug
+   - Fetches single project from Supabase
+   - SEO metadata with Open Graph and Twitter Cards
+   - Cloudinary optimized images (hero, gallery)
+   - Related projects section
+   - 404 handling for missing projects
+
+### Data Layer
+Created `lib/supabase/projects.ts` with 14 functions:
+- `getProjects()` - Fetch all projects
+- `getProjectBySlug(slug)` - Fetch single project
+- `getFeaturedProjects(limit)` - Fetch featured projects
+- `getProjectsByTag(tag)` - Filter by tag
+- `searchProjects(query)` - Full-text search
+- `getAllTags()` - Get all unique tags
+- `getAllCategories()` - Get all unique categories
+- `getRelatedProjects()` - Find related projects
+- CRUD functions: `createProject`, `updateProject`, `deleteProject`
+
+### Component Updates
+1. **`components/projects.tsx`** - Homepage projects section
+   - Now fetches from Supabase using `getFeaturedProjects()`
+   - Uses Suspense for async loading
+   - Fallback loading state
+
+2. **`components/project/ProjectGridWrapper.tsx`** - Grid wrapper with filtering
+   - Category filter buttons
+   - Framer Motion animations
+   - Empty state handling
+
+3. **`components/project/ProjectCard.tsx`** - Individual project card
+   - Updated to use Cloudinary optimized images
+   - TypeScript types from database
+
+## Cloudinary Integration
+
+**Images Uploaded:** 16/16 (100%)
+- Organized in `projects/{slug}/` folders
+- Projects: ecommerce-dashboard, hr-management-system, corporate-landing-page, inventory-tracking-system, fintech-ui-system, access-control-system
+
+## Tech Stack Decisions
+
+- **Server Components** for data fetching (better performance)
+- **Supabase** for database queries
+- **Cloudinary** for optimized image delivery
+- **Framer Motion** for smooth animations
+
+## UI/UX Patterns
+
+- Category filter with visual feedback
+- Search in URL params (shareable links)
+- Loading states with Suspense
+- Empty states for no results
+- Related projects for discovery
+
+## Integration Points
+
+- `@/lib/supabase/projects` - All project queries
+- `@/components/optimized-image` - Cloudinary images
+- `@/types/database` - Project types
+- `app/projects/` - New pages for projects
+
+## Lessons Learned
+
+- Server Components require async for data fetching
+- URL params work great for filtering (shareable links)
+- Cloudinary public IDs should be stored in database
+- Framer Motion adds nice polish to filtering
+
+## Best Practices Established
+
+- Use RSC for data fetching when possible
+- Store image metadata in database (not just URLs)
+- Implement proper SEO for dynamic pages
+- Handle 404s gracefully for missing content
+
+## Migration Required
+
+1. **Apply database migration:**
+   - Go to Supabase SQL Editor
+   - Run `scripts/setup-database.sql`
+
+2. **Run migration script:**
+   - `npx tsx lib/migrate-projects.ts`
+
+3. **Verify data in Supabase**
+
+## Commit
+feat: add dynamic projects display from Supabase

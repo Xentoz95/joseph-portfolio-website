@@ -1,0 +1,37 @@
+# Portfolio CMS - Progress Tracking
+
+## Project Info
+- Feature: Portfolio CMS
+- Branch: flow/portfolio-cms
+- Total Stories: 9
+- Started: 2026-02-04
+
+## Story Status
+
+| ID | Title | Priority | Status | Date Completed |
+|----|-------|----------|--------|----------------|
+| US-001 | Supabase Database Schema & Client Setup | 1 | Pending | - |
+| US-002 | Cloudinary Media Integration | 2 | Pending | - |
+| US-003 | Dynamic Projects Display | 3 | Pending | - |
+| US-004 | Blog System with Markdown Support | 4 | Pending | - |
+| US-005 | Contact Form with Database Storage | 5 | Pending | - |
+| US-006 | Firebase Analytics Integration | 6 | Pending | - |
+| US-007 | Real-time Content Updates | 7 | Pending | - |
+| US-008 | SEO Optimization & Metadata | 8 | Pending | - |
+| US-009 | Content Management Interface (Optional Admin) | 9 | Pending | - |
+
+## Credentials Reference
+- Supabase Project ID: njcggtsozmjhvladuznw
+- Supabase URL: https://njcggtsozmjhvladuznw.supabase.co
+- Cloudinary Cloud Name: dszboz3se
+- Firebase Measurement ID: G-7JKKPGB41D
+- Firebase Project ID: my-portfolio-df483
+
+## MCP Status
+- No MCP servers currently configured
+- PRD includes MCP assignments for when servers are added
+
+## Notes
+- Initial feature - establishes foundational patterns
+- Uses pnpm as package manager
+- Next.js 16 with App Router

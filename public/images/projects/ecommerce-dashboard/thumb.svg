@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad-4qqkj2wr8" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10B981;stop-opacity:0.9" />
+      <stop offset="100%" style="stop-color:#10B981;stop-opacity:0.6" />
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#grad-4qqkj2wr8)"/>
+
+  <!-- Pattern overlay -->
+  <rect width="400" height="300" fill="rgba(255,255,255,0.05)"/>
+  <circle cx="320" cy="60" r="90" fill="rgba(255,255,255,0.1)"/>
+  <circle cx="40" cy="240" r="60" fill="rgba(255,255,255,0.08)"/>
+
+  <!-- Project title -->
+  <text x="50%" y="64" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">
+    E-commerce Dashboard
+  </text>
+
+  <!-- Category badge -->
+  <rect x="140" y="84" width="120" height="30" rx="20" fill="rgba(255,255,255,0.3)"/>
+  <text x="50%" y="102" font-family="Arial, sans-serif" font-size="14" font-weight="600" fill="white" text-anchor="middle">
+    DASHBOARD
+  </text>
+
+  <!-- Decorative elements -->
+  <rect x="40" y="256" width="320" height="4" rx="2" fill="rgba(255,255,255,0.3)"/>
+  <rect x="40" y="256" width="224" height="4" rx="2" fill="white"/>
+</svg>

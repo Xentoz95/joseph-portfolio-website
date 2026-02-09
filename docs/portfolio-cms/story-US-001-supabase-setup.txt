@@ -1,0 +1,112 @@
+---
+memoryVersion: 1
+schemaVersion: 1
+storyId: US-001
+storyTitle: Supabase Database Schema & Client Setup
+feature: Portfolio CMS
+completedDate: 2026-02-04
+agents: development-agent
+---
+
+# Story US-001: Supabase Database Schema & Client Setup
+
+## Implemented
+
+### Files Created:
+1. `.env.local` - Environment variables with Supabase credentials
+2. `lib/supabase/client.ts` - Browser Supabase client for client components (13 lines)
+3. `lib/supabase/server.ts` - Server Supabase client for RSC with cookies (35 lines)
+4. `types/database.ts` - TypeScript types for all tables (180 lines)
+5. `supabase/migrations/001_initial_schema.sql` - Database schema (158 lines)
+6. `lib/supabase/project-migration.ts` - Helper for migrating existing projects (199 lines)
+7. `lib/supabase/README.md` - Documentation
+
+### Packages Installed:
+- `@supabase/supabase-js` (v2.94.0)
+- `@supabase/ssr` (v0.8.0)
+
+## Database Schema
+
+### Projects Table
+- id: uuid (primary key, default uuid_generate_v4())
+- title: text
+- description: text
+- slug: text (unique)
+- tags: text[]
+- images: jsonb (stores thumbnail, hero, gallery, alt)
+- demo_url: text (nullable)
+- repo_url: text (nullable)
+- featured: boolean (default false)
+- category: text
+- created_at: timestamptz (default now())
+- updated_at: timestamptz (default now())
+- published_at: timestamptz (nullable)
+
+### Posts Table
+- id: uuid (primary key)
+- title: text
+- slug: text (unique)
+- content: text (Markdown)
+- excerpt: text
+- cover_image: text
+- tags: text[]
+- published: boolean (default false)
+- created_at: timestamptz
+- updated_at: timestamptz
+- published_at: timestamptz (nullable)
+
+### Contacts Table
+- id: uuid (primary key)
+- name: text
+- email: text
+- message: text
+- created_at: timestamptz
+- read: boolean (default false)
+
+### RLS Policies
+- Projects: Public read, authenticated write
+- Posts: Public read (published only), authenticated write
+- Contacts: Public insert, authenticated read
+
+## Database Decisions
+
+- Used `text[]` for tags array (PostgreSQL native)
+- Used `jsonb` for images (flexible structure)
+- Enabled RLS for security
+- Added indexes on slug for lookups
+- Added trigger for updated_at timestamp
+
+## UI/UX Patterns
+
+- Split client/server client for RSC pattern
+- Server client handles cookies for auth
+- Used @/ path aliases throughout
+
+## Integration Points
+
+- `lib/supabase/client.ts` - Import for client components
+- `lib/supabase/server.ts` - Import for server components
+- `types/database.ts` - TypeScript types for all tables
+
+## Lessons Learned
+
+- Always create migration file before applying to database
+- Use `@supabase/ssr` for RSC cookie handling
+- TypeScript types should match database schema exactly
+- RLS policies need to be set up immediately
+
+## Best Practices Identified
+
+- Store sensitive keys in `.env.local` (gitignored)
+- Use `uuid_generate_v4()` for primary keys
+- Add `updated_at` trigger for automatic timestamp updates
+- Document migrations in `supabase/migrations/` folder
+
+## Next Steps
+
+1. Apply migration SQL in Supabase dashboard
+2. US-002 will handle Cloudinary image hosting
+3. Migrate existing 6 projects from `data/projects.ts` to database
+
+## Commit
+feat: add Supabase database schema and client setup

@@ -1,0 +1,111 @@
+---
+memoryVersion: 1
+schemaVersion: 1
+storyId: US-002
+storyTitle: Cloudinary Media Integration
+feature: Portfolio CMS
+completedDate: 2026-02-04
+agents: development-agent
+---
+
+# Story US-002: Cloudinary Media Integration
+
+## Implemented
+
+### Packages Installed:
+- `next-cloudinary` (v6.17.5)
+- `cloudinary` (v2.9.0) for TypeScript types
+
+### Files Created:
+1. `lib/cloudinary.ts` - Cloudinary configuration with presets
+2. `components/media-upload.tsx` - Upload widget with drag-and-drop (210 lines)
+3. `components/optimized-image.tsx` - Image optimization components (220 lines)
+4. `lib/cloudinary-helpers.ts` - Transformation utilities (200 lines)
+5. `lib/upload-local-images.ts` - Local image migration helper (180 lines)
+6. `docs/project-images-inventory.md` - Complete image documentation
+
+### Cloudinary Configuration
+
+**Credentials:**
+- Cloud Name: dszboz3se
+- API Key: 293868987781493
+- API Secret: yR2CRM9kzXh75wXWRrWyhskOsMg
+
+**Image Presets:**
+- `thumbnail`: 200x200, focus crop, quality 80
+- `featured`: 1200x630, fit, quality 85
+- `gallery`: 800x600, fill, quality 85
+- `hero`: 1920x1080, fill, quality 90
+
+## Existing Project Images
+
+**Total: 22 images across 6 projects**
+
+1. `access-control-system/` - 3 images
+2. `corporate-landing-page/` - 3 images
+3. `ecommerce-dashboard/` - 4 images
+4. `fintech-ui-system/` - 4 images
+5. `hr-management-system/` - 3 images
+6. `inventory-tracking-system/` - 3 images
+
+## Components Created
+
+### MediaUpload Component
+- Drag-and-drop file upload
+- File validation (type, size)
+- Progress tracking
+- Error handling with toast notifications
+- Upload to Cloudinary with organized folders
+
+### OptimizedImage Component Variants
+- `OptimizedImage` - Main wrapper
+- `ThumbnailImage` - Gallery previews (200/400/600px)
+- `FeaturedImage` - Hero/OG images (1200x630)
+- `GalleryImage` - Photo galleries (800x600)
+- `AvatarImage` - User profiles (32/64/128px)
+
+## Helper Functions
+
+### Transformation Functions
+- `resize()` - Image resizing with crop options
+- `crop()` - Focused cropping with gravity
+- `format()` - Format conversion (auto/webp/jpg/png/avif)
+- `optimize()` - Quality optimization
+- `generateResponsiveImages()` - Srcset generation
+- `extractPublicId()` - Extract public ID from URLs
+
+### Migration Helpers
+- `getLocalProjectImages()` - Scan local project images
+- `generateCloudinaryPublicId()` - Generate Cloudinary IDs
+- `prepareUploadBatch()` - Prepare for batch upload
+
+## Integration Points
+
+- `@/lib/cloudinary` - Import for Cloudinary config
+- `@/components/optimized-image` - Import for image components
+- `@/components/media-upload` - Import for upload widget
+- `@/lib/cloudinary-helpers` - Import for transformations
+
+## Lessons Learned
+
+- Cloudinary presets make image management consistent
+- Local images need to be organized before upload
+- Public ID structure should mirror local folder structure
+- Use `next-cloudinary` for Next.js Image component compatibility
+
+## Best Practices Identified
+
+- Organize images by project in Cloudinary folders
+- Use consistent naming conventions (e.g., `project-name/hero`)
+- Implement progressive loading with srcset
+- Store Cloudinary public IDs in database, not full URLs
+
+## Next Steps
+
+1. Upload existing 22 project images to Cloudinary
+2. US-003 will integrate Supabase with Cloudinary images
+3. Replace local image paths with Cloudinary components
+4. Remove local images after successful migration
+
+## Commit
+feat: add Cloudinary media integration

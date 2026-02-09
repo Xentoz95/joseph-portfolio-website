@@ -1,0 +1,148 @@
+---
+memoryVersion: 1
+schemaVersion: 1
+storyId: US-008
+storyTitle: SEO Optimization & Metadata
+feature: Portfolio CMS
+completedDate: 2026-02-06
+agents: development-agent
+---
+
+# Story US-008: SEO Optimization & Metadata
+
+## Implemented
+
+### JSON-LD Structured Data Components
+Created `lib/seo/json-ld.tsx` with comprehensive schema.org support:
+- **OrganizationSchema** - Organization metadata
+- **PersonSchema** - Person/profile metadata with job title, sameAs links, email
+- **WebSiteSchema** - Website metadata with search action support
+- **WebPageSchema** - Generic web page with breadcrumb support
+- **ArticleSchema** - Blog post/article with authors, publisher, published/modified dates
+- **CreativeWorkSchema** - Project pages with keywords, category, dates
+- **BreadcrumbListSchema** - Breadcrumb navigation structured data
+- **CollectionPageSchema** - Listing pages with item lists
+- **ProfilePageSchema** - Homepage profile information
+
+### Dynamic Sitemap
+Updated `app/sitemap.ts`:
+- Now fetches projects and posts dynamically from Supabase
+- Uses `getProjects()` and `getPosts()` data layer functions
+- Includes lastModified dates from database (updated_at or created_at)
+- Proper priority and changeFrequency for different content types
+- Project pages: priority 0.7, monthly changes
+- Blog post pages: priority 0.7, monthly changes
+
+### Canonical URLs
+Added canonical URLs via `alternates.canonical` in Next.js metadata:
+- Homepage: `https://josephthuo.com`
+- Projects: `https://josephthuo.com/projects` and `https://josephthuo.com/projects/{slug}`
+- Blog: `https://josephthuo.com/blog` and `https://josephthuo.com/blog/{slug}`
+- Contact: `https://josephthuo.com/contact`
+
+### Breadcrumb Navigation
+Created `components/seo/breadcrumb.tsx`:
+- **Breadcrumb** component with JSON-LD structured data
+- **ProjectBreadcrumb** - Pre-configured for project pages
+- **BlogPostBreadcrumb** - Pre-configured for blog posts
+- **CategoryBreadcrumb** - For category/tag filtered pages
+- Home icon with proper aria-label
+- Visual separator (ChevronRight)
+- Accessible navigation with ARIA attributes
+- `generateBreadcrumbsFromPath()` helper for dynamic generation
+
+### Updated Metadata in Pages
+Enhanced metadata across all pages:
+
+**Homepage (`app/page.tsx`)**:
+- Added PersonSchema for portfolio owner
+- Added WebSiteSchema for search functionality
+- SameAs links to GitHub, LinkedIn, Twitter
+
+**Project Pages (`app/projects/[slug]/page.tsx`)**:
+- CreativeWorkSchema JSON-LD
+- Breadcrumb navigation
+- Canonical URL in alternates
+- OpenGraph and Twitter Card metadata
+
+**Blog Pages (`app/blog/[slug]/page.tsx`)**:
+- ArticleSchema JSON-LD with article:published_time, article:modified_time
+- Breadcrumb navigation
+- Canonical URL
+- Author and publisher metadata
+
+**Projects Listing (`app/projects/page.tsx`)**:
+- CollectionPageSchema with itemList
+- Breadcrumb navigation
+- Canonical URL
+
+**Blog Listing (`app/blog/page.tsx`)**:
+- CollectionPageSchema with itemList
+- Breadcrumb navigation
+- Canonical URL
+
+**Contact Page (`app/contact/page.tsx`)**:
+- WebPageSchema
+- Breadcrumb navigation
+- Canonical URL
+
+## Tech Stack Decisions
+
+- **Next.js Metadata API** - Built-in metadata generation with proper types
+- **JSON-LD** - script tags with application/ld+json type
+- **schema.org vocabulary** - Standard schemas for SEO
+- **Supabase data layer** - Dynamic content for sitemap
+
+## SEO Features
+
+### Open Graph Tags
+All pages have proper OG tags:
+- og:type (website or article)
+- og:title
+- og:description
+- og:image with proper dimensions (1200x630)
+- og:url
+- og:site_name
+
+### Twitter Card Tags
+Large image cards with:
+- twitter:card (summary_large_image)
+- twitter:title
+- twitter:description
+- twitter:image
+- twitter:creator
+
+### Robots Configuration
+Existing robots.txt at `app/robots.ts`:
+- Allows all user agents
+- Disallows /api/ and /admin/
+- References sitemap.xml
+
+## Integration Points
+
+- `@/lib/seo/json-ld` - All JSON-LD schema components
+- `@/lib/seo/metadata` - Metadata helper utilities
+- `@/components/seo/breadcrumb` - Breadcrumb component
+- `@/lib/supabase/projects` - Project data for sitemap
+- `@/lib/supabase/posts` - Blog data for sitemap
+
+## Best Practices Established
+
+- Always include canonical URLs via `alternates.canonical`
+- Use JSON-LD for structured data (not microdata or RDFa)
+- Include breadcrumb navigation with structured data
+- Use appropriate schema.org types for different content
+- Keep sitemap dynamic for fresh content
+- Include lastModified dates when available
+- Use proper OG image dimensions (1200x630)
+- Include Twitter Card for better social sharing
+
+## Notes
+
+- Canonical URLs use `alternates.canonical` (Next.js convention) not top-level `canonical`
+- robots.txt was already properly configured
+- OpenGraph and Twitter Cards were already implemented in layout.tsx
+- Main additions were JSON-LD structured data, dynamic sitemap, and breadcrumbs
+
+## Commit
+feat: add SEO optimization with JSON-LD structured data, dynamic sitemap, and breadcrumbs
