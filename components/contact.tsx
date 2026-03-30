@@ -8,8 +8,8 @@ import { Mail, Phone, MapPin, MessageCircle, Github, Linkedin, Send } from 'luci
 
 const CONTACT_INFO = {
   email: 'thuojesseph405@gmail.com',
-  phone: '+254 (0) 123 456 789',
-  whatsapp: '+254123456789', // Format: country code + number (no spaces or dashes)
+  phone: '+254 768 682 374',
+  whatsapp: '254768682374', // Format: country code + number (no spaces or dashes)
   location: 'Nairobi, Kenya',
   socialLinks: {
     linkedin: 'https://linkedin.com/in/josephthuo',

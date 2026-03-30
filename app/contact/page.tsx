@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { TrackedExternalLink } from '@/components/tracked-external-link';
 import { WebPageSchema } from '@/lib/seo/json-ld';
 import { Breadcrumb } from '@/components/seo/breadcrumb';
+import { Header } from '@/components/header';
 
 export const metadata: Metadata = {
   title: 'Contact',
@@ -30,7 +31,9 @@ export default function ContactPage() {
         url="https://josephthuo.com/contact"
       />
 
-      <main className="min-h-screen">
+      <Header />
+
+      <main className="min-h-screen pt-16">
         {/* Breadcrumb */}
         <section className="py-4 px-4 sm:px-6 lg:px-8 border-b border-border/50">
           <div className="max-w-6xl mx-auto">
@@ -189,7 +192,6 @@ export default function ContactPage() {
           </div>
         </section>
       </main>
-      <Toaster />
     </>
   );
 }

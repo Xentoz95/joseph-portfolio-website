@@ -412,7 +412,10 @@ export async function getProjectCountByCategory(): Promise<Record<string, number
 }
 
 /**
- * Get related projects based on tags and category
+ * Get related projects based on category or tags
+ *
+ * Fetches more projects than needed and filters client-side to avoid
+ * complex Supabase array queries that can fail with special characters.
  *
  * @param slug - The project slug to find related projects for
  * @param limit - Maximum number of related projects to return
@@ -430,22 +433,48 @@ export async function getRelatedProjects(
 
   const supabase = await createClient();
 
-  // Get projects with matching category or tags
-  const { data, error } = await supabase
-    .from('projects')
-    .select('*')
-    .not('published_at', 'is', null)
-    .neq('slug', slug)
-    .or(`category.eq.${project.category},tags.cs.{${project.tags.join(',')}}`)
-    .order('published_at', { ascending: false })
-    .limit(limit);
+  try {
+    // Fetch more projects to allow filtering
+    const fetchLimit = Math.min(limit * 3, 20); // cap at 20
+    const { data, error } = await supabase
+      .from('projects')
+      .select('*')
+      .not('published_at', 'is', null)
+      .neq('slug', slug)
+      .order('published_at', { ascending: false })
+      .limit(fetchLimit);
 
-  if (error) {
-    console.error(`Error fetching related projects for "${slug}":`, error);
+    if (error) {
+      console.error(`Error fetching related projects for "${slug}":`, error.message || error);
+      return [];
+    }
+
+    const allProjects = (data || []) as Project[];
+
+    if (!project.tags || project.tags.length === 0) {
+      // No tags, return projects from same category only
+      return allProjects
+        .filter(p => p.category === project.category)
+        .slice(0, limit);
+    }
+
+    // Create lowercase tag set for case-insensitive matching
+    const tagSet = new Set(project.tags.map(t => t.toLowerCase()));
+
+    // Filter: match by category OR any tag
+    const related = allProjects.filter(p => {
+      // Same category match
+      if (p.category === project.category) return true;
+
+      // Tag match (case-insensitive)
+      return p.tags.some(tag => tagSet.has(tag.toLowerCase()));
+    });
+
+    return related.slice(0, limit);
+  } catch (err) {
+    console.error(`Exception fetching related projects for "${slug}:`, err);
     return [];
   }
-
-  return (data || []) as Project[];
 }
 
 /**

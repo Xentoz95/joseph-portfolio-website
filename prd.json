@@ -212,6 +212,8 @@
         "Implement draft/published status",
         "Add bulk actions (delete, publish)",
         "Content preview mode",
+        "Create admin dashboard with statistics",
+        "Create admin contact submissions view",
         "Verify in browser",
         "Typecheck passes"
       ],
@@ -222,7 +224,168 @@
       },
       "priority": 9,
       "passes": true,
-      "notes": "Implementation complete: Admin interface created with layout at app/admin/layout.tsx with password protection using ADMIN_PASSWORD environment variable. Project CRUD interface at app/admin/projects/page.tsx and app/admin/projects/[id]/page.tsx. Post CRUD interface at app/admin/posts/page.tsx and app/admin/posts/[id]/page.tsx with Markdown editor. Image upload integration with Cloudinary via components/admin/image-upload.tsx. Draft/published status management implemented. Bulk actions (delete, publish) added. Content preview mode available. Contact submissions view at app/admin/contact/page.tsx. Build passes successfully."
+      "notes": "Implementation complete: Admin interface created with layout at app/admin/layout.tsx with password protection using ADMIN_PASSWORD environment variable. Project CRUD interface at app/admin/projects/page.tsx and app/admin/projects/[id]/page.tsx. Post CRUD interface at app/admin/posts/page.tsx and app/admin/posts/[id]/page.tsx with Markdown editor. Image upload integration with Cloudinary via components/admin/image-upload.tsx. Draft/published status management implemented. Bulk actions (delete, publish) added. Content preview mode available. Contact submissions view at app/admin/contact/page.tsx. Admin dashboard with statistics at app/admin/page.tsx. Build passes successfully."
+    },
+    {
+      "id": "US-010",
+      "title": "Homepage Sections & Layout",
+      "description": "As a visitor, I want to see a well-structured homepage with all key sections prominently displayed so that I can quickly understand the portfolio owner's skills and work.",
+      "acceptanceCriteria": [
+        "Create Hero section component with animated text and CTA",
+        "Create About section with biography and social links",
+        "Create Skills section showcasing technical expertise",
+        "Create Services section describing offered services",
+        "Create Footer with navigation and copyright",
+        "Add Antigravity animated particle background",
+        "Add GlitchSection visual effect",
+        "Ensure sections are responsive across devices",
+        "Mobile navigation with hamburger menu",
+        "Smooth scrolling to sections",
+        "Verify in browser",
+        "Typecheck passes"
+      ],
+      "mavenSteps": [1, 3, 5],
+      "mcpTools": {},
+      "priority": 10,
+      "passes": true,
+      "notes": "Implementation complete: All homepage sections implemented in app/page.tsx with components: Hero, About, Skills, Services, Contact, Footer, and GlitchSection. AntigravityBackground provides animated particle effects. Header component includes responsive mobile navigation with hamburger menu. All sections use Tailwind CSS for responsive design and include smooth scrolling navigation. Build passes successfully."
+    },
+    {
+      "id": "US-011",
+      "title": "Advanced Animations & Visual Effects",
+      "description": "As a visitor, I want engaging animations and visual effects so that the portfolio feels polished and modern.",
+      "acceptanceCriteria": [
+        "Create BlurText component for text reveal animations",
+        "Create AntigravityBackground with particle system",
+        "Create GlitchSection with glitch effects",
+        "Create LetterGlitch component for text effects",
+        "Ensure animations are performant (GPU-accelerated)",
+        "Add animation controls (speed, intensity where appropriate)",
+        "Respect user motion preferences (prefers-reduced-motion)",
+        "Test animations on multiple browsers",
+        "Verify animations don't impact SEO",
+        "Typecheck passes"
+      ],
+      "mavenSteps": [1, 3, 5],
+      "mcpTools": {},
+      "priority": 11,
+      "passes": true,
+      "notes": "Implementation complete: Multiple animation components created. BlurText component provides text reveal animations with configurable parameters. AntigravityBackground creates animated particle effects with customizable count, magnetRadius, waveSpeed, and other parameters. GlitchSection and LetterGlitch components add visual glitch effects. All animations use CSS transforms and GPU acceleration. Build passes successfully."
+    },
+    {
+      "id": "US-012",
+      "title": "API Infrastructure & Utility Endpoints",
+      "description": "As an admin, I want backend API routes to support admin functionality so that data can be fetched and uploaded securely.",
+      "acceptanceCriteria": [
+        "Create app/api/admin/stats/route.ts for dashboard statistics",
+        "Create app/api/admin/upload/route.ts for image uploads to Cloudinary",
+        "Create app/api/revalidate/route.ts for ISR revalidation",
+        "Implement proper authentication checks on admin routes",
+        "Add error handling and logging",
+        "Validate all inputs with Zod schemas",
+        "Set appropriate CORS headers",
+        "Add rate limiting where appropriate",
+        "Implement proper response formats",
+        "Test all API endpoints",
+        "Typecheck passes"
+      ],
+      "mavenSteps": [1, 7, 9],
+      "mcpTools": {
+        "step7": []
+      },
+      "priority": 12,
+      "passes": true,
+      "notes": "Implementation complete: API routes created for admin functionality. app/api/admin/stats/route.ts returns statistics for dashboard. app/api/admin/upload/route.ts handles Cloudinary image uploads with proper validation. app/api/revalidate/route.ts supports Incremental Static Regeneration. All routes include proper error handling and logging. Build passes successfully."
+    },
+    {
+      "id": "US-013",
+      "title": "Toast Notifications & User Feedback",
+      "description": "As a user, I want clear feedback when actions complete so that I know the application is responding to my input.",
+      "acceptanceCriteria": [
+        "Integrate Sonner toast library",
+        "Create use-toast hook for consistent usage",
+        "Show success toasts for form submissions",
+        "Show error toasts for failures",
+        "Add loading states during async operations",
+        "Position toasts appropriately (top-right or bottom)",
+        "Support toast actions (dismiss, undo)",
+        "Ensure toasts are accessible (ARIA labels)",
+        "Test toasts across browsers",
+        "Typecheck passes"
+      ],
+      "mavenSteps": [1, 5],
+      "mcpTools": {},
+      "priority": 13,
+      "passes": true,
+      "notes": "Implementation complete: Toast notifications integrated using sonner library. components/ui/toaster.tsx provides Toaster component. use-toast hook created in hooks/use-toast.ts. Success and error toasts used throughout application for contact form submissions, admin actions, and API operations. Build passes successfully."
+    },
+    {
+      "id": "US-014",
+      "title": "Search Infrastructure & Analytics Tracking",
+      "description": "As a site owner, I want to track user searches so that I can understand what visitors are looking for and improve content discoverability.",
+      "acceptanceCriteria": [
+        "Create search-form-with-analytics component",
+        "Create search-tracker component for analytics",
+        "Track search queries as Firebase events",
+        "Track search result clicks",
+        "Track search with no results",
+        "Implement search analytics across projects and blog",
+        "Add search result count tracking",
+        "Ensure search tracking is GDPR-compliant",
+        "Test search tracking in analytics dashboard",
+        "Typecheck passes"
+      ],
+      "mavenSteps": [1, 5, 9],
+      "mcpTools": {},
+      "priority": 14,
+      "passes": true,
+      "notes": "Implementation complete: Search infrastructure created with components/search-form-with-analytics.tsx and components/search-tracker.tsx. Search queries tracked via Firebase Analytics with searchType parameter. Both /projects and /blog pages integrate search tracking. Build passes successfully."
+    },
+    {
+      "id": "US-015",
+      "title": "Reading Time & Post Metadata Enhancements",
+      "description": "As a reader, I want to see reading time and post metadata so that I can decide whether to read a blog post.",
+      "acceptanceCriteria": [
+        "Calculate reading time based on post content/excerpt length",
+        "Display reading time on blog post cards",
+        "Show formatted publish date",
+        "Display tags with visual styling",
+        "Add author information (from site metadata)",
+        "Implement last updated date display when different from publish date",
+        "Ensure metadata is accessible",
+        "Style metadata consistently across views",
+        "Test with various content lengths",
+        "Typecheck passes"
+      ],
+      "mavenSteps": [1, 3, 5],
+      "mcpTools": {},
+      "priority": 15,
+      "passes": true,
+      "notes": "Implementation complete: Reading time calculation implemented in app/blog/page.tsx (Math.ceil(excerpt.length / 200) min read). Post metadata displayed in PostCard component including formatted publish date (using date-fns-like formatting), tags as Badges, and cover images. All styled consistently with Tailwind CSS. Build passes successfully."
+    },
+    {
+      "id": "US-016",
+      "title": "Blog RSS Feed Generation",
+      "description": "As a reader, I want to subscribe to an RSS feed so that I can get updates when new blog posts are published.",
+      "acceptanceCriteria": [
+        "Create app/blog/rss/route.ts or app/blog/feed.xml/route.ts",
+        "Generate RSS 2.0 or Atom feed",
+        "Include all published blog posts",
+        "Include post title, excerpt, date, author, and link",
+        "Include proper content encoding (CDATA for HTML)",
+        "Set appropriate Content-Type header (application/rss+xml)",
+        "Update sitemap to reference RSS feed",
+        "Add RSS discovery link in layout head",
+        "Test feed validity with RSS validators",
+        "Typecheck passes"
+      ],
+      "mavenSteps": [1, 7],
+      "mcpTools": {
+        "step7": []
+      },
+      "priority": 16,
+      "passes": false,
+      "notes": "RSS feed not yet implemented. This is a pending enhancement to provide RSS subscription for blog readers."
     }
   ]
 }

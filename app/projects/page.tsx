@@ -17,6 +17,7 @@ import { SearchFormWithAnalytics } from '@/components/search-form-with-analytics
 import { ProjectsRealtimeWrapper } from './projects-realtime';
 import { CollectionPageSchema } from '@/lib/seo/json-ld';
 import { Breadcrumb } from '@/components/seo/breadcrumb';
+import { Header } from '@/components/header';
 
 export const metadata: Metadata = {
   title: 'Projects | Portfolio',
@@ -179,7 +180,9 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
   }));
 
   return (
-    <main className="min-h-screen">
+    <>
+      <Header />
+      <main className="min-h-screen pt-16">
       {/* JSON-LD Structured Data */}
       <CollectionPageSchema
         name="Projects"
@@ -229,5 +232,6 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
         </div>
       </section>
     </main>
+    </>
   );
 }

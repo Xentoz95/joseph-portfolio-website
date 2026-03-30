@@ -54,7 +54,7 @@ export default function Home() {
         fieldStrength={12}
       />
       <Header />
-      <main className="bg-background text-foreground relative z-10">
+      <main className="bg-background text-foreground relative z-10 pt-16">
         <Hero />
         <About />
         <Skills />

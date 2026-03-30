@@ -16,6 +16,7 @@ import { ArrowLeft, ExternalLink, Github, Calendar, Tag } from 'lucide-react';
 import { buildCloudinaryUrl } from '@/lib/cloudinary-helpers';
 import { CreativeWorkSchema, BreadcrumbListSchema } from '@/lib/seo/json-ld';
 import { Breadcrumb } from '@/components/seo/breadcrumb';
+import { Header } from '@/components/header';
 
 interface ProjectPageProps {
   params: Promise<{
@@ -117,7 +118,10 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
   const relatedProjects = await getRelatedProjects(slug, 3);
 
   return (
-    <main className="min-h-screen">
+    <>
+      <Header />
+
+      <main className="min-h-screen pt-16">
       {/* JSON-LD Structured Data */}
       <CreativeWorkSchema
         title={project.title}
@@ -381,5 +385,6 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         </div>
       </section>
     </main>
+    </>
   );
 }

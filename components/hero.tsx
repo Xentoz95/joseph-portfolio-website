@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import LetterGlitch from './letter-glitch';
 import { BlurText } from './blur-text';
-import { Github, Linkedin, Mail } from 'lucide-react';
+import { Github, Linkedin, Mail, MessageCircle } from 'lucide-react';
 
 export function Hero() {
   return (
@@ -26,21 +26,21 @@ export function Hero() {
           <div className="space-y-8 order-2 lg:order-1">
             <div className="space-y-4">
               <BlurText
-                text="Welcome to my portfolio"
+                text="Hello! I'm Joseph Thuo"
                 className="text-primary font-semibold text-lg tracking-wide"
                 delay={100}
                 animateBy="words"
                 direction="top"
               />
               <BlurText
-                text="I'm Joseph Thuo"
+                text="Let's Build Something Amazing Together"
                 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-foreground leading-tight text-balance"
                 delay={150}
                 animateBy="words"
                 direction="top"
               />
               <BlurText
-                text="Creative Web Developer & System Builder"
+                text="Full Stack Developer & System Builder"
                 className="text-3xl sm:text-4xl font-bold text-primary/80 leading-tight text-balance"
                 delay={200}
                 animateBy="words"
@@ -49,7 +49,7 @@ export function Hero() {
             </div>
 
             <BlurText
-              text="I craft modern web experiences, powerful systems, and digital solutions that solve real problems. From responsive frontends to custom dashboards, I turn ideas into impactful products."
+              text="I transform ideas into elegant, high-performance web applications. Whether you need a stunning website, a powerful business system, or a complete digital solution, I'm here to help bring your vision to life."
               className="text-lg sm:text-xl text-muted-foreground leading-relaxed max-w-md block"
               delay={300}
               animateBy="words"
@@ -57,7 +57,7 @@ export function Hero() {
             />
 
             <BlurText
-              text="Specializing in web development, UI/UX design, systems architecture, and business tools."
+              text="Ready to start your project? Let's chat! I respond quickly and love exploring new ideas."
               className="text-base text-muted-foreground leading-relaxed max-w-md block"
               delay={500}
               animateBy="words"
@@ -91,20 +91,32 @@ export function Hero() {
                 <Mail className="w-5 h-5" />
                 Email
               </a>
+              <a
+                href="https://wa.me/254768682374"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600 transition-all duration-300 shadow-lg hover:shadow-green-500/30"
+              >
+                <MessageCircle className="w-5 h-5" />
+                WhatsApp
+              </a>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-4">
               <a
-                href="#contact"
-                className="inline-flex items-center justify-center px-8 py-4 bg-primary text-primary-foreground font-semibold rounded-xl hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 transform hover:-translate-y-1"
+                href="https://wa.me/254768682374"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center px-8 py-4 bg-green-500 text-white font-semibold rounded-xl hover:bg-green-600 transition-all duration-300 shadow-lg hover:shadow-green-500/30 transform hover:-translate-y-1"
               >
-                Get in Touch
+                <MessageCircle className="w-5 h-5 mr-2" />
+                Start a Conversation
               </a>
               <a
                 href="#projects"
                 className="inline-flex items-center justify-center px-8 py-4 border-2 border-primary text-primary font-semibold rounded-xl hover:bg-primary/10 transition-all duration-300"
               >
-                View My Work
+                See My Projects
               </a>
             </div>
           </div>

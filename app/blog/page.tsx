@@ -19,6 +19,7 @@ import { SearchFormWithAnalytics } from '@/components/search-form-with-analytics
 import { PostsRealtimeWrapper } from './posts-realtime';
 import { CollectionPageSchema } from '@/lib/seo/json-ld';
 import { Breadcrumb } from '@/components/seo/breadcrumb';
+import { Header } from '@/components/header';
 
 export const metadata: Metadata = {
   title: 'Blog | Portfolio',
@@ -282,7 +283,10 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
   }));
 
   return (
-    <main className="min-h-screen">
+    <>
+      <Header />
+
+      <main className="min-h-screen pt-16">
       {/* JSON-LD Structured Data */}
       <CollectionPageSchema
         name="Blog"
@@ -332,5 +336,6 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
         </div>
       </section>
     </main>
+    </>
   );
 }

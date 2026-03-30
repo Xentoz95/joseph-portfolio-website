@@ -39,8 +39,8 @@ export const socialLinks: SocialLink[] = [
   {
     id: 'whatsapp',
     platform: 'WhatsApp',
-    url: 'https://wa.me/254123456789',
-    username: '+254 123 456 789',
+    url: 'https://wa.me/254768682374',
+    username: '+254 768 682 374',
   },
   {
     id: 'email',

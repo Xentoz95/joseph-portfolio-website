@@ -15,19 +15,19 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex gap-1">
-          <Link href="#about" className="px-4 py-2 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300">
+          <Link href="/#about" className="px-4 py-2 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300">
             About
           </Link>
-          <Link href="#skills" className="px-4 py-2 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300">
+          <Link href="/#skills" className="px-4 py-2 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300">
             Skills
           </Link>
-          <Link href="#projects" className="px-4 py-2 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300">
+          <Link href="/projects" className="px-4 py-2 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300">
             Projects
           </Link>
-          <Link href="#services" className="px-4 py-2 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300">
+          <Link href="/#services" className="px-4 py-2 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300">
             Services
           </Link>
-          <Link href="#contact" className="px-4 py-2 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300">
+          <Link href="/contact" className="px-4 py-2 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300">
             Contact
           </Link>
         </div>
@@ -56,19 +56,19 @@ export function Header() {
         {isOpen && (
           <div className="absolute top-16 left-0 right-0 bg-background/95 backdrop-blur border-b border-border/50 md:hidden">
             <div className="flex flex-col gap-2 p-4">
-              <Link href="#about" onClick={() => setIsOpen(false)} className="px-4 py-2.5 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300">
+              <Link href="/#about" onClick={() => setIsOpen(false)} className="px-4 py-2.5 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300">
                 About
               </Link>
-              <Link href="#skills" onClick={() => setIsOpen(false)} className="px-4 py-2.5 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300">
+              <Link href="/#skills" onClick={() => setIsOpen(false)} className="px-4 py-2.5 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300">
                 Skills
               </Link>
-              <Link href="#projects" onClick={() => setIsOpen(false)} className="px-4 py-2.5 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300">
+              <Link href="/projects" onClick={() => setIsOpen(false)} className="px-4 py-2.5 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300">
                 Projects
               </Link>
-              <Link href="#services" onClick={() => setIsOpen(false)} className="px-4 py-2.5 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300">
+              <Link href="/#services" onClick={() => setIsOpen(false)} className="px-4 py-2.5 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300">
                 Services
               </Link>
-              <Link href="#contact" onClick={() => setIsOpen(false)} className="px-4 py-2.5 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300">
+              <Link href="/contact" onClick={() => setIsOpen(false)} className="px-4 py-2.5 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-300">
                 Contact
               </Link>
             </div>

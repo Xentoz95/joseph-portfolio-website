@@ -17,6 +17,7 @@ import { ArrowLeft, Calendar, Clock, User } from 'lucide-react';
 import { buildCloudinaryUrl } from '@/lib/cloudinary-helpers';
 import { ArticleSchema, BreadcrumbListSchema } from '@/lib/seo/json-ld';
 import { Breadcrumb } from '@/components/seo/breadcrumb';
+import { Header } from '@/components/header';
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -109,7 +110,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   const relatedPosts = await getRelatedPosts(slug, post.tags, 3);
 
   return (
-    <main className="min-h-screen">
+    <>
+      <Header />
+
+      <main className="min-h-screen pt-16">
       {/* JSON-LD Structured Data */}
       <ArticleSchema
         title={post.title}
@@ -264,5 +268,6 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
         </div>
       </section>
     </main>
+    </>
   );
 }
