@@ -33,8 +33,12 @@ export function MediaUpload({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = async (file: File) => {
+    // Determine if it's a video
+    const isVideo = file.type.startsWith('video/');
+    const isImage = file.type.startsWith('image/');
+
     // Validate file type
-    if (type === 'image' && !file.type.startsWith('image/')) {
+    if (type === 'image' && !isImage) {
       toast({
         title: 'Error',
         description: 'Please select an image file',
@@ -42,7 +46,7 @@ export function MediaUpload({
       });
       return;
     }
-    if (type === 'video' && !file.type.startsWith('video/')) {
+    if (type === 'video' && !isVideo) {
       toast({
         title: 'Error',
         description: 'Please select a video file',
@@ -70,22 +74,23 @@ export function MediaUpload({
       reader.onload = async (event) => {
         const base64 = event.target?.result as string;
 
-        // Simulate progress
+        // Faster progress simulation
         const progressInterval = setInterval(() => {
           setProgress((prev) => {
-            if (prev >= 90) {
+            if (prev >= 85) {
               clearInterval(progressInterval);
-              return 90;
+              return 85;
             }
-            return prev + 10;
+            return prev + 15;
           });
-        }, 200);
+        }, 100);
 
         try {
           // Upload to server
           const formData = new FormData();
           formData.append('file', base64);
           formData.append('folder', 'portfolio/media');
+          formData.append('fileType', isVideo ? 'video' : 'image');
 
           const response = await fetch('/api/admin/upload', {
             method: 'POST',
@@ -93,7 +98,8 @@ export function MediaUpload({
           });
 
           if (!response.ok) {
-            throw new Error('Failed to upload file');
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || 'Failed to upload file');
           }
 
           const result = await response.json();
@@ -113,8 +119,25 @@ export function MediaUpload({
           }, 500);
         } catch (error) {
           clearInterval(progressInterval);
-          throw error;
+          console.error('Upload error:', error);
+          toast({
+            title: 'Upload Failed',
+            description: error instanceof Error ? error.message : 'Failed to upload file',
+            variant: 'destructive',
+          });
+          setUploading(false);
+          setProgress(0);
         }
+      };
+
+      reader.onerror = () => {
+        toast({
+          title: 'Error',
+          description: 'Failed to read file',
+          variant: 'destructive',
+        });
+        setUploading(false);
+        setProgress(0);
       };
 
       reader.readAsDataURL(file);
@@ -165,7 +188,11 @@ export function MediaUpload({
     any: 'min-h-[150px] max-h-80',
   };
 
-  const isVideo = value?.includes('video') || value?.endsWith('.mp4') || value?.endsWith('.webm') || value?.endsWith('.mov');
+  const isVideo = value?.includes('video') ||
+    value?.endsWith('.mp4') ||
+    value?.endsWith('.webm') ||
+    value?.endsWith('.mov') ||
+    value?.includes('cloudinary.com') && value.includes('/video/');
 
   if (value) {
     return (

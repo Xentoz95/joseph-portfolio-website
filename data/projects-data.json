@@ -1,1 +1,74 @@
-{}
+[
+  {
+    "id": "churchflow-crm",
+    "slug": "churchflow-crm",
+    "title": "ChurchFlow CRM",
+    "description": "A comprehensive CRM solution for churches to manage members, events, and communications.",
+    "longDescription": "ChurchFlow CRM is a powerful customer relationship management system designed specifically for churches.",
+    "category": "system",
+    "tags": [
+      "church",
+      "crm",
+      "management"
+    ],
+    "thumbnail": "/images/placeholder.png",
+    "hero": "/images/placeholder.png",
+    "gallery": [],
+    "alt": "ChurchFlow CRM",
+    "featured": true,
+    "technologies": [
+      "React",
+      "Node.js",
+      "PostgreSQL",
+      "Supabase"
+    ],
+    "liveUrl": "",
+    "githubUrl": "https://github.com/example/churchflow",
+    "published": true
+  },
+  {
+    "id": "portfolio-v3",
+    "slug": "portfolio-v3",
+    "title": "Portfolio Website V3",
+    "description": "My personal portfolio website showcasing my work and skills.",
+    "longDescription": "A modern, responsive portfolio website built with Next.js.",
+    "category": "web",
+    "tags": [
+      "portfolio",
+      "nextjs",
+      "react"
+    ],
+    "thumbnail": "/images/placeholder.png",
+    "hero": "/images/placeholder.png",
+    "gallery": [],
+    "alt": "Portfolio Website",
+    "featured": true,
+    "technologies": [
+      "Next.js",
+      "React",
+      "TypeScript",
+      "Tailwind CSS"
+    ],
+    "liveUrl": "",
+    "githubUrl": "https://github.com/Xentoz95/portfolio",
+    "published": true
+  },
+  {
+    "id": "project-1776283368431",
+    "slug": "flyer-1",
+    "title": "flyer 1",
+    "description": "KEEPS RECODS FOR THE flyers",
+    "longDescription": "",
+    "category": "design",
+    "tags": [],
+    "thumbnail": "https://res.cloudinary.com/dszboz3se/image/upload/v1776285544/portfolio/media/d0wsvpxilwyfmoxisaon.png",
+    "hero": "/images/placeholder.png",
+    "gallery": [],
+    "alt": "",
+    "featured": true,
+    "technologies": [],
+    "liveUrl": "#",
+    "githubUrl": "#",
+    "published": true
+  }
+]

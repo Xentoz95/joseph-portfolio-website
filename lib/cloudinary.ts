@@ -134,6 +134,7 @@ export async function uploadImage(
     folder?: string;
     publicId?: string;
     transformation?: TransformationOptions;
+    resourceType?: 'image' | 'video' | 'raw';
   } = {}
 ): Promise<{
   publicId: string;
@@ -149,7 +150,7 @@ export async function uploadImage(
     folder: options.folder || 'portfolio',
     public_id: options.publicId,
     transformation: options.transformation,
-    resource_type: 'image',
+    resource_type: options.resourceType || 'image',
   });
 
   return {
@@ -158,6 +159,42 @@ export async function uploadImage(
     secureUrl: uploadResult.secure_url,
     width: uploadResult.width,
     height: uploadResult.height,
+  };
+}
+
+/**
+ * Upload a video to Cloudinary
+ *
+ * @param file - The file to upload (base64 data URL or buffer)
+ * @param options - Upload options
+ * @returns Upload result with public ID and URL
+ */
+export async function uploadVideo(
+  file: string | Buffer,
+  options: {
+    folder?: string;
+    publicId?: string;
+  } = {}
+): Promise<{
+  publicId: string;
+  url: string;
+  secureUrl: string;
+  duration?: number;
+}> {
+  // Convert Buffer to base64 string if needed
+  const fileData = Buffer.isBuffer(file) ? file.toString('base64') : file;
+
+  const uploadResult = await cloudinary.uploader.upload(fileData, {
+    folder: options.folder || 'portfolio/videos',
+    public_id: options.publicId,
+    resource_type: 'video',
+  });
+
+  return {
+    publicId: uploadResult.public_id,
+    url: uploadResult.url,
+    secureUrl: uploadResult.secure_url,
+    duration: uploadResult.duration,
   };
 }
 
