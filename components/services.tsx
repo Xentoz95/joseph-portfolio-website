@@ -1,6 +1,7 @@
 'use client';
 
 import { BlurText } from './blur-text';
+import { FadeIn } from './FadeIn';
 
 export function Services() {
   const services = [
@@ -46,34 +47,23 @@ export function Services() {
     <section id="services" className="py-24 px-4 sm:px-6 lg:px-8 bg-card">
       <div className="max-w-7xl mx-auto">
         <div className="space-y-6 mb-16">
-          <BlurText
-            text="What I Can Do For You"
-            className="text-primary font-semibold text-lg tracking-wide"
-            delay={100}
-            animateBy="words"
-            direction="top"
-          />
-          <BlurText
-            text="Services Offered"
-            className="text-5xl sm:text-6xl font-bold text-foreground text-balance"
-            delay={150}
-            animateBy="words"
-            direction="top"
-          />
+          <FadeIn delay={100} className="text-primary font-semibold text-lg tracking-wide">
+            What I Can Do For You
+          </FadeIn>
+          <FadeIn delay={150} className="text-5xl sm:text-6xl font-bold text-foreground text-balance">
+            Services Offered
+          </FadeIn>
         </div>
-        <BlurText
-          text="Comprehensive solutions tailored to your business needs, from web development to custom systems and digital transformation"
-          className="text-lg text-muted-foreground mb-16 max-w-3xl block"
-          delay={250}
-          animateBy="words"
-          direction="bottom"
-        />
+        <FadeIn delay={250} className="text-lg text-muted-foreground mb-16 max-w-3xl block">
+          Comprehensive solutions tailored to your business needs, from web development to custom systems and digital transformation
+        </FadeIn>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-20">
           {services.map((service, i) => (
-            <div
+            <FadeIn
               key={i}
-              className="group bg-background rounded-2xl p-8 border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10 transform hover:-translate-y-1"
+              delay={i * 100}
+              className="group bg-card rounded-2xl p-8 border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 transform hover:-translate-y-1"
             >
               <h3 className="text-xl font-bold text-primary mb-3 group-hover:text-primary transition">{service.title}</h3>
               <p className="text-foreground/80 mb-6 text-sm leading-relaxed">{service.description}</p>
@@ -81,24 +71,20 @@ export function Services() {
               <ul className="space-y-3">
                 {service.features.map((feature, j) => (
                   <li key={j} className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-gradient-to-r from-primary to-primary/70 rounded-full flex-shrink-0 group-hover:scale-125 transition-transform" />
+                    <div className="w-2 h-2 bg-gradient-to-r from-primary to-primary/60 rounded-full flex-shrink-0 group-hover:scale-125 transition-transform" />
                     <span className="text-sm text-foreground/90 group-hover:text-foreground transition">{feature}</span>
                   </li>
                 ))}
               </ul>
-            </div>
+            </FadeIn>
           ))}
         </div>
 
         {/* Process */}
         <div className="bg-foreground/5 rounded-3xl p-8 sm:p-12 border border-border/50">
-          <BlurText
-            text="My Working Process"
-            className="text-3xl font-bold text-foreground mb-12"
-            delay={300}
-            animateBy="words"
-            direction="top"
-          />
+          <FadeIn delay={300} className="text-3xl font-bold text-foreground mb-12">
+            My Working Process
+          </FadeIn>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
@@ -124,12 +110,12 @@ export function Services() {
               },
             ].map((item, i) => (
               <div key={i} className="relative">
-                <div className="text-5xl font-bold text-primary/20 mb-4">{item.step}</div>
+                <div className="text-6xl font-bold text-primary/40 mb-4">{item.step}</div>
                 <h4 className="text-xl font-bold text-foreground mb-3">{item.title}</h4>
                 <p className="text-foreground/75 text-sm leading-relaxed">{item.desc}</p>
 
                 {i < 3 && (
-                  <div className="hidden lg:block absolute top-6 -right-4 text-primary/30 text-3xl font-light">
+                  <div className="hidden lg:block absolute top-6 -right-4 text-primary/50 text-3xl font-light">
                     →
                   </div>
                 )}

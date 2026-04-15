@@ -1,0 +1,29 @@
+[
+  {
+    "id": "contact-1",
+    "name": "Sarah Johnson",
+    "email": "sarah.johnson@example.com",
+    "phone": "+254712345678",
+    "message": "Hi Joseph! I came across your portfolio and I'm impressed by your work. I'm looking for a developer to help build a web application for my startup. Would love to discuss this further.",
+    "read": false,
+    "created_at": "2024-03-15T14:30:00Z"
+  },
+  {
+    "id": "contact-2",
+    "name": "David Mwangi",
+    "email": "david.mwangi@techke.com",
+    "phone": "+254723456789",
+    "message": "Hello, I'm interested in your ChurchFlow CRM solution for our church. Can we schedule a demo call to discuss the features and pricing?",
+    "read": true,
+    "created_at": "2024-03-14T09:15:00Z"
+  },
+  {
+    "id": "contact-3",
+    "name": "Emily Wanjiku",
+    "email": "emily.wanjiku@designstudio.co",
+    "phone": "+254734567890",
+    "message": "Great portfolio! I'm a UI/UX designer looking for a developer to collaborate with on client projects. Let's connect!",
+    "read": false,
+    "created_at": "2024-03-13T16:45:00Z"
+  }
+]

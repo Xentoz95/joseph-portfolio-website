@@ -1,10 +1,9 @@
 'use client';
 
 /**
- * Admin Contact Page
+ * Admin Contact Page - Local JSON Based
  *
- * Protected admin page to view and manage contact submissions
- * Simple password protection via environment variable
+ * View and manage contact submissions without coding!
  */
 
 import { useState, useEffect } from 'react';
@@ -13,44 +12,84 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AdminAuth } from '@/components/admin/admin-auth';
-import {
-  adminGetContacts,
-  adminMarkAsRead,
-  adminDeleteContact,
-} from './actions';
-import type { Contact } from '@/types/database';
+import { Mail, Phone, Trash2, Eye, Check, RefreshCw } from 'lucide-react';
+
+// Contact type
+interface Contact {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+  read: boolean;
+  created_at: string;
+}
+
+// Load contacts from API
+async function loadContacts(): Promise<Contact[]> {
+  try {
+    const response = await fetch('/api/contacts');
+    if (response.ok) {
+      return await response.json();
+    }
+  } catch (e) {
+    console.error('Error loading contacts:', e);
+  }
+  return [];
+}
+
+// Save contacts to local JSON
+async function saveContacts(contacts: Contact[]): Promise<boolean> {
+  try {
+    const response = await fetch('/api/contacts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(contacts),
+    });
+    return response.ok;
+  } catch (e) {
+    console.error('Error saving contacts:', e);
+    return false;
+  }
+}
 
 export default function AdminContactPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
 
-  // Fetch contacts when authenticated
   useEffect(() => {
     fetchContacts();
   }, [filter]);
 
   const fetchContacts = async () => {
     setLoading(true);
-    try {
-      const data = await adminGetContacts({ unreadOnly: filter === 'unread' });
-      setContacts(data);
-    } catch (error) {
-      toast.error('Failed to load contacts');
-      console.error('Error fetching contacts:', error);
-    } finally {
-      setLoading(false);
-    }
+    const data = await loadContacts();
+    setContacts(data);
+    setLoading(false);
   };
 
   const handleMarkAsRead = async (id: string) => {
-    try {
-      await adminMarkAsRead(id);
+    const updatedContacts = contacts.map(c =>
+      c.id === id ? { ...c, read: true } : c
+    );
+    const success = await saveContacts(updatedContacts);
+    if (success) {
+      setContacts(updatedContacts);
       toast.success('Marked as read');
-      fetchContacts();
-    } catch (error) {
+    } else {
       toast.error('Failed to mark as read');
-      console.error('Error marking as read:', error);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    const updatedContacts = contacts.map(c => ({ ...c, read: true }));
+    const success = await saveContacts(updatedContacts);
+    if (success) {
+      setContacts(updatedContacts);
+      toast.success('All marked as read');
+    } else {
+      toast.error('Failed to mark all as read');
     }
   };
 
@@ -58,16 +97,39 @@ export default function AdminContactPage() {
     if (!confirm('Are you sure you want to delete this contact?')) {
       return;
     }
-
-    try {
-      await adminDeleteContact(id);
+    const updatedContacts = contacts.filter(c => c.id !== id);
+    const success = await saveContacts(updatedContacts);
+    if (success) {
+      setContacts(updatedContacts);
       toast.success('Contact deleted');
-      fetchContacts();
-    } catch (error) {
+    } else {
       toast.error('Failed to delete contact');
-      console.error('Error deleting contact:', error);
     }
   };
+
+  const handleDeleteAllRead = async () => {
+    const unreadContacts = contacts.filter(c => !c.read);
+    if (unreadContacts.length === contacts.length) {
+      toast.error('No read messages to delete');
+      return;
+    }
+    if (!confirm(`Delete ${contacts.length - unreadContacts.length} read messages?`)) {
+      return;
+    }
+    const success = await saveContacts(unreadContacts);
+    if (success) {
+      setContacts(unreadContacts);
+      toast.success('Read messages deleted');
+    } else {
+      toast.error('Failed to delete');
+    }
+  };
+
+  const filteredContacts = filter === 'unread'
+    ? contacts.filter(c => !c.read)
+    : contacts;
+
+  const unreadCount = contacts.filter(c => !c.read).length;
 
   return (
     <AdminAuth>
@@ -77,30 +139,62 @@ export default function AdminContactPage() {
           <div>
             <h1 className="text-3xl font-bold text-foreground">Contact Submissions</h1>
             <p className="text-muted-foreground mt-1">
-              Manage messages from your contact form
+              Manage messages from your contact form - {unreadCount} unread
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             <Button
               variant={filter === 'all' ? 'default' : 'outline'}
+              size="sm"
               onClick={() => setFilter('all')}
             >
-              All
+              All ({contacts.length})
             </Button>
             <Button
               variant={filter === 'unread' ? 'default' : 'outline'}
+              size="sm"
               onClick={() => setFilter('unread')}
             >
-              Unread
+              Unread ({unreadCount})
             </Button>
-            <Button variant="outline" onClick={fetchContacts} disabled={loading}>
-              {loading ? 'Loading...' : 'Refresh'}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchContacts}
+              disabled={loading}
+            >
+              <RefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
             </Button>
+            {unreadCount > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleMarkAllAsRead}
+              >
+                <Check className="mr-2 h-4 w-4" />
+                Mark All Read
+              </Button>
+            )}
+            {contacts.some(c => c.read) && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDeleteAllRead}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete Read
+              </Button>
+            )}
           </div>
         </div>
 
         {/* Contacts List */}
-        {contacts.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Loading contacts...</p>
+          </div>
+        ) : filteredContacts.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center">
               <p className="text-muted-foreground">
@@ -110,7 +204,7 @@ export default function AdminContactPage() {
           </Card>
         ) : (
           <div className="space-y-4">
-            {contacts.map((contact) => (
+            {filteredContacts.map((contact) => (
               <Card key={contact.id} className={!contact.read ? 'border-primary' : ''}>
                 <CardHeader>
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -126,10 +220,23 @@ export default function AdminContactPage() {
                       <CardDescription className="flex items-center gap-2 flex-wrap">
                         <a
                           href={`mailto:${contact.email}`}
-                          className="hover:text-primary transition"
+                          className="flex items-center gap-1 hover:text-primary transition"
                         >
+                          <Mail className="w-3 h-3" />
                           {contact.email}
                         </a>
+                        {contact.phone && (
+                          <>
+                            <span>•</span>
+                            <a
+                              href={`tel:${contact.phone}`}
+                              className="flex items-center gap-1 hover:text-primary transition"
+                            >
+                              <Phone className="w-3 h-3" />
+                              {contact.phone}
+                            </a>
+                          </>
+                        )}
                         <span>•</span>
                         <span className="text-xs">
                           {new Date(contact.created_at).toLocaleString()}
@@ -143,7 +250,8 @@ export default function AdminContactPage() {
                           variant="outline"
                           onClick={() => handleMarkAsRead(contact.id)}
                         >
-                          Mark as Read
+                          <Eye className="mr-2 h-4 w-4" />
+                          Mark Read
                         </Button>
                       )}
                       <Button
@@ -151,6 +259,7 @@ export default function AdminContactPage() {
                         variant="destructive"
                         onClick={() => handleDelete(contact.id)}
                       >
+                        <Trash2 className="mr-2 h-4 w-4" />
                         Delete
                       </Button>
                     </div>
@@ -166,6 +275,19 @@ export default function AdminContactPage() {
               </Card>
             ))}
           </div>
+        )}
+
+        {/* Summary */}
+        {contacts.length > 0 && (
+          <Card className="bg-muted/50">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>Total: {contacts.length} messages</span>
+                <span>Unread: {unreadCount}</span>
+                <span>Read: {contacts.length - unreadCount}</span>
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
     </AdminAuth>

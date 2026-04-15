@@ -1,19 +1,9 @@
 /**
  * Admin Layout
  *
- * Layout for admin pages with navigation and shared components
+ * Layout for admin pages with responsive sidebar navigation
  */
 
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import {
-  LayoutDashboard,
-  FolderKanban,
-  FileText,
-  Mail,
-  LogOut,
-  Menu
-} from 'lucide-react';
 import { AdminNav } from '@/components/admin/admin-nav';
 
 export default function AdminLayout({
@@ -24,8 +14,11 @@ export default function AdminLayout({
   return (
     <div className="min-h-screen bg-background">
       <AdminNav />
-      <main className="container mx-auto px-4 py-8">
-        {children}
+      {/* Main content - starts below fixed header (pt-16) and has left margin for sidebar (lg:pl-64) */}
+      <main className="pt-16 lg:pl-64 min-h-screen">
+        <div className="p-4 lg:p-8">
+          {children}
+        </div>
       </main>
     </div>
   );

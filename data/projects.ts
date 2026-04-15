@@ -2,6 +2,31 @@ import { Project } from '../types';
 
 export const projects: Project[] = [
   {
+    id: 'brand-identity-2024',
+    slug: 'brand-identity-2024',
+    title: 'Personal Brand Identity',
+    description: 'Complete personal brand identity design featuring logo, color palette, and visual elements. Modern dark theme with neon accents representing innovation and creativity.',
+    longDescription: 'A comprehensive personal brand identity created to represent my professional presence. The design features a modern dark aesthetic with vibrant neon blue and orange accents, symbolizing the blend of technical expertise and creative problem-solving. The logo and visual elements are versatile across all media platforms.',
+    category: 'branding',
+    tags: ['Branding', 'Logo Design', 'Color Theory', 'Visual Identity'],
+    images: {
+      thumbnail: '/images/brand/logo.png',
+      hero: '/images/brand/4.png',
+      gallery: [
+        '/images/brand/logo.png',
+        '/images/brand/4.png',
+        '/images/brand/DONE-05.png',
+        '/images/brand/DONE-07.png',
+        '/images/brand/DONE-08.png',
+      ],
+      alt: 'Personal Brand Identity - Dark theme with neon accents',
+    },
+    featured: true,
+    technologies: ['Logo Design', 'Color Theory', 'Brand Strategy'],
+    liveUrl: '#',
+    githubUrl: '#',
+  },
+  {
     id: 'ecommerce-dashboard',
     slug: 'ecommerce-dashboard',
     title: 'E-Commerce Dashboard',

@@ -1,0 +1,15 @@
+
+> my-v0-project@0.1.0 typecheck
+> tsc --noEmit
+
+app/learning/page.tsx(81,10): error TS17008: JSX element 'div' has no corresponding closing tag.
+components/about.tsx(74,14): error TS17008: JSX element 'FadeIn' has no corresponding closing tag.
+components/about.tsx(142,9): error TS17002: Expected corresponding JSX closing tag for 'section'.
+components/about.tsx(143,5): error TS1005: ')' expected.
+components/about.tsx(144,3): error TS1109: Expression expected.
+components/testimonials.tsx(121,16): error TS17008: JSX element 'div' has no corresponding closing tag.
+components/testimonials.tsx(127,13): error TS1005: ')' expected.
+components/testimonials.tsx(128,13): error TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+components/testimonials.tsx(148,9): error TS17002: Expected corresponding JSX closing tag for 'section'.
+components/testimonials.tsx(149,5): error TS1005: ')' expected.
+components/testimonials.tsx(150,3): error TS1109: Expression expected.

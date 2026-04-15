@@ -57,7 +57,7 @@ export function Footer() {
                 <a
                   key={i}
                   href="#"
-                  className="inline-flex items-center justify-center w-8 h-8 bg-background border border-border rounded hover:border-primary hover:text-primary transition text-xs font-semibold"
+                  className="inline-flex items-center justify-center w-9 h-9 bg-card border border-border rounded-lg hover:border-primary hover:text-primary hover:shadow-sm transition-all duration-300 text-xs font-semibold"
                 >
                   {social.charAt(0)}
                 </a>

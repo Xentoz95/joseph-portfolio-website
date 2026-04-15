@@ -3,7 +3,7 @@
 /**
  * Admin Navigation Component
  *
- * Navigation bar for admin pages with mobile support
+ * Responsive sidebar navigation with mobile drawer support
  */
 
 import Link from 'next/link';
@@ -16,7 +16,8 @@ import {
   Mail,
   LogOut,
   Menu,
-  X
+  X,
+  Home
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -50,117 +51,168 @@ export function AdminNav() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
-    // Clear admin auth from localStorage
     if (typeof window !== 'undefined') {
       localStorage.removeItem('admin-auth');
     }
     router.push('/admin');
   };
 
+  const closeMobileMenu = () => setMobileMenuOpen(false);
+
   return (
-    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
-          {/* Logo/Brand */}
-          <div className="flex items-center gap-8">
-            <Link href="/admin" className="flex items-center gap-2 font-semibold text-lg">
-              <FolderKanban className="h-6 w-6" />
+    <>
+      {/* Top Header - Fixed at top for both mobile and desktop */}
+      <header className="fixed top-0 left-0 right-0 h-16 border-b bg-background/95 backdrop-blur z-50 flex items-center justify-between px-4">
+        <div className="flex items-center gap-4">
+          {/* Mobile menu button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden"
+            onClick={() => setMobileMenuOpen(true)}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+          <Link href="/admin" className="flex items-center gap-2 font-semibold text-lg">
+            <FolderKanban className="h-5 w-5 text-primary" />
+            <span className="hidden sm:inline">Admin Dashboard</span>
+          </Link>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="hidden sm:flex items-center gap-2"
+            onClick={handleLogout}
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
+          <Link
+            href="/"
+            className="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Home className="h-4 w-4" />
+            <span className="hidden sm:inline">View Site</span>
+          </Link>
+        </div>
+      </header>
+
+      {/* Mobile Overlay */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          onClick={closeMobileMenu}
+        />
+      )}
+
+      {/* Mobile Sidebar Drawer */}
+      <aside
+        className={cn(
+          'lg:hidden fixed top-0 left-0 h-full w-72 bg-background border-r z-50 transform transition-transform duration-200',
+          mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        )}
+      >
+        <div className="flex flex-col h-full">
+          <div className="h-16 flex items-center justify-between px-4 border-b">
+            <Link href="/admin" className="flex items-center gap-2 font-semibold" onClick={closeMobileMenu}>
+              <FolderKanban className="h-5 w-5 text-primary" />
               <span>Admin</span>
             </Link>
-
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center gap-1">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = pathname === item.href ||
-                  (item.href !== '/admin' && pathname.startsWith(item.href));
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={cn(
-                      'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
-                      isActive
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </div>
+            <Button variant="ghost" size="icon" onClick={closeMobileMenu}>
+              <X className="h-5 w-5" />
+            </Button>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleLogout}
-              className="hidden md:flex items-center gap-2"
-            >
-              <LogOut className="h-4 w-4" />
-              Logout
-            </Button>
+          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href ||
+                (item.href !== '/admin' && pathname.startsWith(item.href));
 
-            {/* Mobile menu button */}
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={closeMobileMenu}
+                  className={cn(
+                    'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                    isActive
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                  )}
+                >
+                  <Icon className="h-5 w-5 flex-shrink-0" />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="p-4 border-t space-y-1 lg:hidden">
             <Button
               variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
+              onClick={handleLogout}
             >
-              {mobileMenuOpen ? (
-                <X className="h-5 w-5" />
-              ) : (
-                <Menu className="h-5 w-5" />
-              )}
+              <LogOut className="h-5 w-5 flex-shrink-0" />
+              Logout
             </Button>
           </div>
         </div>
+      </aside>
 
-        {/* Mobile Navigation */}
-        {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t">
-            <div className="flex flex-col gap-1">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = pathname === item.href ||
-                  (item.href !== '/admin' && pathname.startsWith(item.href));
+      {/* Desktop Sidebar - Fixed left sidebar */}
+      <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-screen w-64 bg-background border-r z-40">
+        <div className="h-16 flex items-center border-b px-6">
+          <Link href="/admin" className="flex items-center gap-2 font-semibold text-lg">
+            <FolderKanban className="h-5 w-5 text-primary" />
+            <span>Admin</span>
+          </Link>
+        </div>
 
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={cn(
-                      'flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors',
-                      isActive
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {item.label}
-                  </Link>
-                );
-              })}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLogout}
-                className="justify-start gap-3"
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href ||
+              (item.href !== '/admin' && pathname.startsWith(item.href));
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
+                  isActive
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                )}
               >
-                <LogOut className="h-4 w-4" />
-                Logout
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
-    </nav>
+                <Icon className="h-5 w-5 flex-shrink-0" />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="p-4 border-t space-y-1">
+          <Link
+            href="/"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          >
+            <Home className="h-5 w-5 flex-shrink-0" />
+            <span>View Site</span>
+          </Link>
+          <Button
+            variant="ghost"
+            className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground"
+            onClick={handleLogout}
+          >
+            <LogOut className="h-5 w-5 flex-shrink-0" />
+            <span>Logout</span>
+          </Button>
+        </div>
+      </aside>
+    </>
   );
 }

@@ -4,6 +4,7 @@ import React from "react";
 import Image from 'next/image';
 import { useState } from 'react';
 import { BlurText } from './blur-text';
+import { FadeIn } from './FadeIn';
 import { Mail, Phone, MapPin, MessageCircle, Github, Linkedin, Send } from 'lucide-react';
 
 const CONTACT_INFO = {
@@ -67,22 +68,24 @@ export function Contact() {
   };
 
   return (
-    <section id="contact" className="py-20 px-4 sm:px-6 lg:px-8 bg-card">
-      <div className="max-w-6xl mx-auto">
-        <BlurText
-          text="Let's Work Together"
-          className="text-4xl sm:text-5xl font-bold text-foreground mb-4 text-balance text-center"
-          delay={100}
-          animateBy="words"
-          direction="top"
+    <section id="contact" className="py-20 px-4 sm:px-6 lg:px-8 bg-card relative overflow-hidden">
+      {/* Brand Watermark Background */}
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <Image
+          src="/images/brand/4.png"
+          alt=""
+          fill
+          className="object-cover opacity-[0.05] grayscale"
         />
-        <BlurText
-          text="Have a project in mind? Let's discuss how I can help bring your ideas to life."
-          className="text-lg text-muted-foreground mb-16 text-center max-w-2xl mx-auto block"
-          delay={200}
-          animateBy="words"
-          direction="bottom"
-        />
+      </div>
+
+      <div className="max-w-6xl mx-auto relative z-10">
+        <FadeIn delay={100} className="text-4xl sm:text-5xl font-bold text-foreground mb-4 text-balance text-center">
+          Let's Work Together
+        </FadeIn>
+        <FadeIn delay={200} className="text-lg text-muted-foreground mb-16 text-center max-w-2xl mx-auto block">
+          Have a project in mind? Let's discuss how I can help bring your ideas to life.
+        </FadeIn>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
           {/* Profile Image & Quick Contact */}
@@ -95,6 +98,7 @@ export function Contact() {
                 fill
                 className="object-cover"
                 sizes="256px"
+                loading="lazy"
               />
             </div>
 
@@ -124,7 +128,7 @@ export function Contact() {
             </div>
 
             {/* Contact Info */}
-            <div className="space-y-4 bg-background rounded-xl p-6 border border-border">
+            <div className="space-y-4 bg-card rounded-xl p-6 border border-border shadow-sm">
               <div className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-primary" />
                 <div>
@@ -149,7 +153,7 @@ export function Contact() {
                   href={CONTACT_INFO.socialLinks.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center w-12 h-12 bg-background border border-border rounded-xl hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300"
+                  className="inline-flex items-center justify-center w-12 h-12 bg-card border border-border rounded-xl hover:bg-primary hover:text-primary-foreground hover:border-primary hover:shadow-md transition-all duration-300"
                 >
                   <Linkedin className="w-5 h-5" />
                 </a>
@@ -157,7 +161,7 @@ export function Contact() {
                   href={CONTACT_INFO.socialLinks.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center w-12 h-12 bg-background border border-border rounded-xl hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300"
+                  className="inline-flex items-center justify-center w-12 h-12 bg-card border border-border rounded-xl hover:bg-primary hover:text-primary-foreground hover:border-primary hover:shadow-md transition-all duration-300"
                 >
                   <Github className="w-5 h-5" />
                 </a>
@@ -165,7 +169,7 @@ export function Contact() {
                   href={CONTACT_INFO.socialLinks.twitter}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center w-12 h-12 bg-background border border-border rounded-xl hover:bg-primary hover:text-primary-foreground hover:border-primary transition-all duration-300"
+                  className="inline-flex items-center justify-center w-12 h-12 bg-card border border-border rounded-xl hover:bg-primary hover:text-primary-foreground hover:border-primary hover:shadow-md transition-all duration-300"
                 >
                   <MessageCircle className="w-5 h-5" />
                 </a>

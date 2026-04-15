@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import { BlurText } from '@/components/blur-text';
 import { ContactForm } from '@/components/contact/contact-form';
 import { Toaster } from '@/components/ui/toaster';
@@ -33,7 +34,17 @@ export default function ContactPage() {
 
       <Header />
 
-      <main className="min-h-screen pt-16">
+      <main className="min-h-screen pt-16 relative">
+        {/* Brand Watermark Background */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
+          <Image
+            src="/images/brand/4.png"
+            alt=""
+            fill
+            className="object-cover opacity-[0.05] grayscale"
+          />
+        </div>
+
         {/* Breadcrumb */}
         <section className="py-4 px-4 sm:px-6 lg:px-8 border-b border-border/50">
           <div className="max-w-6xl mx-auto">

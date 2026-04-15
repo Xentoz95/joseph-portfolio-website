@@ -349,7 +349,6 @@ export async function getAllTags(): Promise<string[]> {
     .not('published_at', 'is', null);
 
   if (error) {
-    console.error('Error fetching tags:', error);
     return [];
   }
 
