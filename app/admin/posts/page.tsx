@@ -7,16 +7,14 @@
  */
 
 import { useState, useEffect } from 'react';
-import { toast } from 'sonner';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from '@/hooks/use-toast';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { AdminAuth } from '@/components/admin/admin-auth';
-import { Plus, Trash2, Edit, Save, X, Eye, EyeOff, Search, Filter, Check } from 'lucide-react';
-import Link from 'next/link';
+import { Plus, Trash2, Edit, Eye, EyeOff, Search, Check } from 'lucide-react';
+import { PostForm } from '@/components/admin/post-form';
 
 // Post type
 interface Post {
@@ -101,6 +99,7 @@ export default function AdminPostsPage() {
 
   const handleCreate = () => {
     setIsCreating(true);
+    setEditingId(null);
     setFormData({
       id: `post-${Date.now()}`,
       title: '',
@@ -119,58 +118,80 @@ export default function AdminPostsPage() {
 
   const handleEdit = (post: Post) => {
     setEditingId(post.id);
+    setIsCreating(false);
     setFormData({ ...post });
   };
 
-  const handleSave = async () => {
-    if (!formData.id || !formData.title) {
-      toast.error('Please fill in required fields');
+  const handleFormSave = async (savedData: Partial<Post>) => {
+    if (!savedData.id || !savedData.title) {
+      toast({
+        title: 'Error',
+        description: 'Please fill in required fields',
+        variant: 'destructive',
+      });
       return;
     }
 
     // Generate slug from title if not set
-    if (!formData.slug) {
-      formData.slug = formData.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    if (!savedData.slug) {
+      savedData.slug = savedData.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     }
 
-    formData.updated_at = new Date().toISOString();
+    savedData.updated_at = new Date().toISOString();
 
-    const existingIndex = posts.findIndex(p => p.id === formData.id);
+    const existingIndex = posts.findIndex(p => p.id === savedData.id);
     let updatedPosts = [...posts];
 
     if (existingIndex >= 0) {
-      updatedPosts[existingIndex] = formData as Post;
+      updatedPosts[existingIndex] = savedData as Post;
     } else {
-      updatedPosts.push(formData as Post);
+      updatedPosts.push(savedData as Post);
     }
 
     const success = await savePosts(updatedPosts);
     if (success) {
       setPosts(updatedPosts);
-      toast.success('Post saved!');
+      toast({
+        title: 'Success',
+        description: 'Post saved!',
+      });
       setEditingId(null);
       setIsCreating(false);
       setFormData({});
     } else {
-      toast.error('Failed to save post');
+      toast({
+        title: 'Error',
+        description: 'Failed to save post',
+        variant: 'destructive',
+      });
     }
   };
 
+  const handleFormCancel = () => {
+    setEditingId(null);
+    setIsCreating(false);
+    setFormData({});
+  };
+
   const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this post?')) {
+      return;
+    }
     const updatedPosts = posts.filter(p => p.id !== id);
     const success = await savePosts(updatedPosts);
     if (success) {
       setPosts(updatedPosts);
-      toast.success('Post deleted');
+      toast({
+        title: 'Success',
+        description: 'Post deleted',
+      });
     } else {
-      toast.error('Failed to delete post');
+      toast({
+        title: 'Error',
+        description: 'Failed to delete post',
+        variant: 'destructive',
+      });
     }
-  };
-
-  const handleCancel = () => {
-    setEditingId(null);
-    setIsCreating(false);
-    setFormData({});
   };
 
   const handleTogglePublish = async (post: Post) => {
@@ -184,13 +205,17 @@ export default function AdminPostsPage() {
     const success = await savePosts(updatedPosts);
     if (success) {
       setPosts(updatedPosts);
-      toast.success(updatedPost.published ? 'Post published' : 'Post unpublished');
+      toast({
+        title: 'Success',
+        description: updatedPost.published ? 'Post published' : 'Post unpublished',
+      });
+    } else {
+      toast({
+        title: 'Error',
+        description: 'Failed to update post',
+        variant: 'destructive',
+      });
     }
-  };
-
-  const handleTagsChange = (value: string) => {
-    const tags = value.split(',').map(t => t.trim()).filter(t => t);
-    setFormData({ ...formData, tags });
   };
 
   const handleToggleSelect = (id: string) => {
@@ -213,14 +238,24 @@ export default function AdminPostsPage() {
 
   const handleBulkDelete = async () => {
     if (selectedIds.size === 0) return;
+    if (!confirm(`Delete ${selectedIds.size} post(s)?`)) {
+      return;
+    }
     const updatedPosts = posts.filter(p => !selectedIds.has(p.id));
     const success = await savePosts(updatedPosts);
     if (success) {
       setPosts(updatedPosts);
       setSelectedIds(new Set());
-      toast.success(`${selectedIds.size} post(s) deleted`);
+      toast({
+        title: 'Success',
+        description: `${selectedIds.size} post(s) deleted`,
+      });
     } else {
-      toast.error('Failed to delete posts');
+      toast({
+        title: 'Error',
+        description: 'Failed to delete posts',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -235,118 +270,18 @@ export default function AdminPostsPage() {
     if (success) {
       setPosts(updatedPosts);
       setSelectedIds(new Set());
-      toast.success(`${selectedIds.size} post(s) published`);
+      toast({
+        title: 'Success',
+        description: `${selectedIds.size} post(s) published`,
+      });
     } else {
-      toast.error('Failed to publish posts');
+      toast({
+        title: 'Error',
+        description: 'Failed to publish posts',
+        variant: 'destructive',
+      });
     }
   };
-
-  // Edit/Create Form Component
-  const PostForm = ({ post }: { post?: Post }) => (
-    <Card className="mb-8 border-primary">
-      <CardHeader>
-        <CardTitle>{post ? 'Edit Post' : 'Create New Post'}</CardTitle>
-        <CardDescription>Fill in the details below. Separate tags with commas.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid gap-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>Title *</Label>
-              <Input
-                value={formData.title || ''}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="Post Title"
-              />
-            </div>
-            <div>
-              <Label>Slug *</Label>
-              <Input
-                value={formData.slug || ''}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                placeholder="post-slug (auto-generated if empty)"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label>Excerpt *</Label>
-            <Textarea
-              value={formData.excerpt || ''}
-              onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
-              placeholder="Brief excerpt for post preview"
-              rows={2}
-            />
-          </div>
-
-          <div>
-            <Label>Content</Label>
-            <Textarea
-              value={formData.content || ''}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              placeholder="Full post content"
-              rows={6}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label>Category</Label>
-              <select
-                className="w-full px-3 py-2 border rounded-lg bg-background"
-                value={formData.category || 'tutorial'}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              >
-                <option value="tutorial">Tutorial</option>
-                <option value="case-study">Case Study</option>
-                <option value="blog">Blog</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div>
-              <Label>Published</Label>
-              <select
-                className="w-full px-3 py-2 border rounded-lg bg-background"
-                value={formData.published ? 'yes' : 'no'}
-                onChange={(e) => setFormData({ ...formData, published: e.target.value === 'yes' })}
-              >
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-            </div>
-            <div>
-              <Label>Cover Image URL</Label>
-              <Input
-                value={formData.coverImage || ''}
-                onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
-                placeholder="/images/blog/post.png"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label>Tags (comma separated)</Label>
-            <Input
-              value={formData.tags?.join(', ') || ''}
-              onChange={(e) => handleTagsChange(e.target.value)}
-              placeholder="React, Next.js, TypeScript"
-            />
-          </div>
-
-          <div className="flex gap-2 pt-4">
-            <Button onClick={handleSave} className="flex-1">
-              <Save className="w-4 h-4 mr-2" />
-              Save Post
-            </Button>
-            <Button variant="outline" onClick={handleCancel}>
-              <X className="w-4 h-4 mr-2" />
-              Cancel
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
 
   return (
     <AdminAuth>
@@ -368,7 +303,13 @@ export default function AdminPostsPage() {
         </div>
 
         {/* Create/Edit Form */}
-        {(isCreating || editingId) && <PostForm />}
+        {(isCreating || editingId) && (
+          <PostForm
+            initialData={formData}
+            onSave={handleFormSave}
+            onCancel={handleFormCancel}
+          />
+        )}
 
         {/* Filters and Search */}
         {!isCreating && !editingId && (

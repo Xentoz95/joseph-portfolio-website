@@ -7,16 +7,14 @@
  */
 
 import { useState, useEffect } from 'react';
-import { toast } from 'sonner';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { toast } from '@/hooks/use-toast';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { AdminAuth } from '@/components/admin/admin-auth';
-import { Plus, Trash2, Edit, Save, X, Eye, EyeOff, Image as ImageIcon, Check } from 'lucide-react';
+import { Plus, Trash2, Edit, Eye, EyeOff, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
+import { ProjectForm } from '@/components/admin/project-form';
 
 // Project type
 interface Project {
@@ -51,12 +49,21 @@ async function loadProjects(): Promise<Project[]> {
   return [];
 }
 
-// Save projects to local JSON (simulated - in real app would need API)
+// Save projects to API
 async function saveProjects(projects: Project[]): Promise<boolean> {
   try {
-    // For demo, we'll save to localStorage and show success
-    localStorage.setItem('portfolio-projects', JSON.stringify(projects));
-    return true;
+    // Save to API
+    const response = await fetch('/api/projects', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(projects),
+    });
+    if (response.ok) {
+      // Also save to localStorage as backup
+      localStorage.setItem('portfolio-projects', JSON.stringify(projects));
+      return true;
+    }
+    return false;
   } catch (e) {
     console.error('Error saving projects:', e);
     return false;
@@ -102,6 +109,7 @@ export default function AdminProjectsPage() {
 
   const handleCreate = () => {
     setIsCreating(true);
+    setEditingId(null);
     setFormData({
       id: `project-${Date.now()}`,
       slug: '',
@@ -124,249 +132,133 @@ export default function AdminProjectsPage() {
 
   const handleEdit = (project: Project) => {
     setEditingId(project.id);
+    setIsCreating(false);
     setFormData({ ...project });
   };
 
-  const handleSave = async () => {
-    if (!formData.id || !formData.title || !formData.slug) {
-      toast.error('Please fill in required fields');
+  const handleFormSave = async (savedData: Partial<Project>) => {
+    // Validate required fields
+    if (!savedData.id || !savedData.title) {
+      toast({
+        title: 'Error',
+        description: 'Title is required',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!savedData.description) {
+      toast({
+        title: 'Error',
+        description: 'Slogan is required',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // For dev categories, require thumbnail
+    if ((savedData.category === 'web' || savedData.category === 'system') && !savedData.thumbnail) {
+      toast({
+        title: 'Error',
+        description: 'Screenshot/preview image is required',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // For media categories, require thumbnail
+    if ((savedData.category === 'design' || savedData.category === 'video') && !savedData.thumbnail) {
+      toast({
+        title: 'Error',
+        description: 'Please upload an image or video',
+        variant: 'destructive',
+      });
       return;
     }
 
     // Generate slug from title if not set
-    if (!formData.slug) {
-      formData.slug = formData.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    if (!savedData.slug) {
+      savedData.slug = savedData.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     }
 
-    const existingIndex = projects.findIndex(p => p.id === formData.id);
+    // Ensure arrays exist
+    savedData.tags = savedData.tags || [];
+    savedData.technologies = savedData.technologies || [];
+
+    const existingIndex = projects.findIndex(p => p.id === savedData.id);
     let updatedProjects = [...projects];
 
     if (existingIndex >= 0) {
-      updatedProjects[existingIndex] = formData as Project;
+      updatedProjects[existingIndex] = savedData as Project;
     } else {
-      updatedProjects.push(formData as Project);
+      updatedProjects.push(savedData as Project);
     }
 
     const success = await saveProjects(updatedProjects);
     if (success) {
       setProjects(updatedProjects);
-      toast.success('Project saved!');
+      toast({
+        title: 'Success',
+        description: 'Project saved!',
+      });
       setEditingId(null);
       setIsCreating(false);
       setFormData({});
     } else {
-      toast.error('Failed to save project');
+      toast({
+        title: 'Error',
+        description: 'Failed to save project',
+        variant: 'destructive',
+      });
     }
   };
 
-  const handleDelete = async (id: string) => {
-    const updatedProjects = projects.filter(p => p.id !== id);
-    const success = await saveProjects(updatedProjects);
-    if (success) {
-      setProjects(updatedProjects);
-      toast.success('Project deleted');
-    } else {
-      toast.error('Failed to delete project');
-    }
-  };
-
-  const handleCancel = () => {
+  const handleFormCancel = () => {
     setEditingId(null);
     setIsCreating(false);
     setFormData({});
   };
 
-  const handleTagsChange = (value: string) => {
-    const tags = value.split(',').map(t => t.trim()).filter(t => t);
-    setFormData({ ...formData, tags });
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this project?')) {
+      return;
+    }
+    const updatedProjects = projects.filter(p => p.id !== id);
+    const success = await saveProjects(updatedProjects);
+    if (success) {
+      setProjects(updatedProjects);
+      toast({
+        title: 'Success',
+        description: 'Project deleted',
+      });
+    } else {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete project',
+        variant: 'destructive',
+      });
+    }
   };
 
-  const handleTechnologiesChange = (value: string) => {
-    const technologies = value.split(',').map(t => t.trim()).filter(t => t);
-    setFormData({ ...formData, technologies });
+  const handleTogglePublish = async (project: Project) => {
+    const updatedProjects = projects.map(p =>
+      p.id === project.id ? { ...p, published: !p.published } : p
+    );
+    const success = await saveProjects(updatedProjects);
+    if (success) {
+      setProjects(updatedProjects);
+      toast({
+        title: 'Success',
+        description: project.published ? 'Project unpublished' : 'Project published',
+      });
+    } else {
+      toast({
+        title: 'Error',
+        description: 'Failed to update project',
+        variant: 'destructive',
+      });
+    }
   };
-
-  const handleGalleryChange = (value: string) => {
-    const gallery = value.split(',').map(t => t.trim()).filter(t => t);
-    setFormData({ ...formData, gallery });
-  };
-
-  // Edit/Create Form Component
-  const ProjectForm = ({ project }: { project?: Project }) => (
-    <Card className="mb-8 border-primary">
-      <CardHeader>
-        <CardTitle>{project ? 'Edit Project' : 'Create New Project'}</CardTitle>
-        <CardDescription>Fill in the details below. Separate tags/technologies with commas.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid gap-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>Title *</Label>
-              <Input
-                value={formData.title || ''}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                placeholder="Project Title"
-              />
-            </div>
-            <div>
-              <Label>Slug *</Label>
-              <Input
-                value={formData.slug || ''}
-                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
-                placeholder="project-slug (auto-generated if empty)"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label>Short Description *</Label>
-            <Textarea
-              value={formData.description || ''}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              placeholder="Brief description for project cards"
-              rows={2}
-            />
-          </div>
-
-          <div>
-            <Label>Long Description</Label>
-            <Textarea
-              value={formData.longDescription || ''}
-              onChange={(e) => setFormData({ ...formData, longDescription: e.target.value })}
-              placeholder="Detailed description for project page"
-              rows={4}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <Label>Category</Label>
-              <select
-                className="w-full px-3 py-2 border rounded-lg bg-background"
-                value={formData.category || 'web'}
-                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              >
-                <option value="web">Web Development</option>
-                <option value="system">System</option>
-                <option value="dashboard">Dashboard</option>
-                <option value="branding">Branding</option>
-                <option value="design">Design</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div>
-              <Label>Featured</Label>
-              <select
-                className="w-full px-3 py-2 border rounded-lg bg-background"
-                value={formData.featured ? 'yes' : 'no'}
-                onChange={(e) => setFormData({ ...formData, featured: e.target.value === 'yes' })}
-              >
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-            </div>
-            <div>
-              <Label>Published</Label>
-              <select
-                className="w-full px-3 py-2 border rounded-lg bg-background"
-                value={formData.published ? 'yes' : 'no'}
-                onChange={(e) => setFormData({ ...formData, published: e.target.value === 'yes' })}
-              >
-                <option value="yes">Yes</option>
-                <option value="no">No</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <Label>Tags (comma separated)</Label>
-            <Input
-              value={formData.tags?.join(', ') || ''}
-              onChange={(e) => handleTagsChange(e.target.value)}
-              placeholder="React, Next.js, TypeScript"
-            />
-          </div>
-
-          <div>
-            <Label>Technologies (comma separated)</Label>
-            <Input
-              value={formData.technologies?.join(', ') || ''}
-              onChange={(e) => handleTechnologiesChange(e.target.value)}
-              placeholder="React, Node.js, PostgreSQL"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>Thumbnail Image URL</Label>
-              <Input
-                value={formData.thumbnail || ''}
-                onChange={(e) => setFormData({ ...formData, thumbnail: e.target.value })}
-                placeholder="/images/projects/project/thumb.png"
-              />
-            </div>
-            <div>
-              <Label>Hero Image URL</Label>
-              <Input
-                value={formData.hero || ''}
-                onChange={(e) => setFormData({ ...formData, hero: e.target.value })}
-                placeholder="/images/projects/project/hero.png"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label>Gallery Images (comma separated URLs)</Label>
-            <Input
-              value={formData.gallery?.join(', ') || ''}
-              onChange={(e) => handleGalleryChange(e.target.value)}
-              placeholder="/images/projects/1.png, /images/projects/2.png"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label>Live URL</Label>
-              <Input
-                value={formData.liveUrl || ''}
-                onChange={(e) => setFormData({ ...formData, liveUrl: e.target.value })}
-                placeholder="https://example.com"
-              />
-            </div>
-            <div>
-              <Label>GitHub URL</Label>
-              <Input
-                value={formData.githubUrl || ''}
-                onChange={(e) => setFormData({ ...formData, githubUrl: e.target.value })}
-                placeholder="https://github.com/username/repo"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label>Alt Text</Label>
-            <Input
-              value={formData.alt || ''}
-              onChange={(e) => setFormData({ ...formData, alt: e.target.value })}
-              placeholder="Description of the project"
-            />
-          </div>
-
-          <div className="flex gap-2 pt-4">
-            <Button onClick={handleSave} className="flex-1">
-              <Save className="w-4 h-4 mr-2" />
-              Save Project
-            </Button>
-            <Button variant="outline" onClick={handleCancel}>
-              <X className="w-4 h-4 mr-2" />
-              Cancel
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
 
   return (
     <AdminAuth>
@@ -388,7 +280,13 @@ export default function AdminProjectsPage() {
         </div>
 
         {/* Create/Edit Form */}
-        {(isCreating || editingId) && <ProjectForm />}
+        {(isCreating || editingId) && (
+          <ProjectForm
+            initialData={formData}
+            onSave={handleFormSave}
+            onCancel={handleFormCancel}
+          />
+        )}
 
         {/* Projects List */}
         {loading ? (
@@ -465,13 +363,7 @@ export default function AdminProjectsPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => {
-                            setFormData({
-                              ...project,
-                              published: !project.published
-                            });
-                            setEditingId(project.id);
-                          }}
+                          onClick={() => handleTogglePublish(project)}
                         >
                           {project.published ? (
                             <>

@@ -17,7 +17,8 @@ import {
   LogOut,
   Menu,
   X,
-  Home
+  Home,
+  Settings
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -42,6 +43,11 @@ const navItems = [
     href: '/admin/contact',
     label: 'Contact',
     icon: Mail,
+  },
+  {
+    href: '/admin/settings',
+    label: 'Settings',
+    icon: Settings,
   },
 ];
 

@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Eye, EyeOff } from 'lucide-react';
 
-const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123';
+const ENV_ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD || 'admin123';
 
 interface AdminAuthProps {
   children: React.ReactNode;
@@ -23,6 +23,7 @@ export function AdminAuth({ children }: AdminAuthProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     // Check if already authenticated
@@ -34,15 +35,29 @@ export function AdminAuth({ children }: AdminAuthProps) {
     }
   }, []);
 
+  // Get the effective password (custom password from settings or env password)
+  const getEffectivePassword = () => {
+    if (typeof window !== 'undefined') {
+      // Check for custom password set in settings
+      const customPassword = localStorage.getItem('admin-custom-password');
+      return customPassword || ENV_ADMIN_PASSWORD;
+    }
+    return ENV_ADMIN_PASSWORD;
+  };
+
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === ADMIN_PASSWORD) {
+    setError('');
+
+    const effectivePassword = getEffectivePassword();
+
+    if (password === effectivePassword) {
       setIsAuthenticated(true);
       if (typeof window !== 'undefined') {
         localStorage.setItem('admin-auth', 'true');
       }
     } else {
-      alert('Invalid password');
+      setError('Invalid password');
     }
   };
 
@@ -63,7 +78,10 @@ export function AdminAuth({ children }: AdminAuthProps) {
                     id="password"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setError('');
+                    }}
                     placeholder="Enter admin password"
                     required
                     className="pr-10"
@@ -76,6 +94,9 @@ export function AdminAuth({ children }: AdminAuthProps) {
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
                 </div>
+                {error && (
+                  <p className="text-sm text-destructive mt-1">{error}</p>
+                )}
               </div>
               <Button type="submit" className="w-full">
                 Login

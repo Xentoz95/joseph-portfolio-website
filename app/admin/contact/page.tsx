@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -76,9 +76,16 @@ export default function AdminContactPage() {
     const success = await saveContacts(updatedContacts);
     if (success) {
       setContacts(updatedContacts);
-      toast.success('Marked as read');
+      toast({
+        title: 'Success',
+        description: 'Marked as read',
+      });
     } else {
-      toast.error('Failed to mark as read');
+      toast({
+        title: 'Error',
+        description: 'Failed to mark as read',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -87,9 +94,16 @@ export default function AdminContactPage() {
     const success = await saveContacts(updatedContacts);
     if (success) {
       setContacts(updatedContacts);
-      toast.success('All marked as read');
+      toast({
+        title: 'Success',
+        description: 'All marked as read',
+      });
     } else {
-      toast.error('Failed to mark all as read');
+      toast({
+        title: 'Error',
+        description: 'Failed to mark all as read',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -101,16 +115,27 @@ export default function AdminContactPage() {
     const success = await saveContacts(updatedContacts);
     if (success) {
       setContacts(updatedContacts);
-      toast.success('Contact deleted');
+      toast({
+        title: 'Success',
+        description: 'Contact deleted',
+      });
     } else {
-      toast.error('Failed to delete contact');
+      toast({
+        title: 'Error',
+        description: 'Failed to delete contact',
+        variant: 'destructive',
+      });
     }
   };
 
   const handleDeleteAllRead = async () => {
     const unreadContacts = contacts.filter(c => !c.read);
     if (unreadContacts.length === contacts.length) {
-      toast.error('No read messages to delete');
+      toast({
+        title: 'Error',
+        description: 'No read messages to delete',
+        variant: 'destructive',
+      });
       return;
     }
     if (!confirm(`Delete ${contacts.length - unreadContacts.length} read messages?`)) {
@@ -119,9 +144,16 @@ export default function AdminContactPage() {
     const success = await saveContacts(unreadContacts);
     if (success) {
       setContacts(unreadContacts);
-      toast.success('Read messages deleted');
+      toast({
+        title: 'Success',
+        description: 'Read messages deleted',
+      });
     } else {
-      toast.error('Failed to delete');
+      toast({
+        title: 'Error',
+        description: 'Failed to delete',
+        variant: 'destructive',
+      });
     }
   };
 
