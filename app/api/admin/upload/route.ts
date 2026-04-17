@@ -39,16 +39,12 @@ export async function POST(request: NextRequest) {
     // Generate timestamp for the signature
     const timestamp = Math.floor(Date.now() / 1000);
 
-    // Build the parameters to sign
+    // Build the parameters to sign (only folder and timestamp for signed uploads)
+    // Note: For signed uploads, we don't use upload_preset - the signature authenticates
     const paramsToSign: Record<string, string> = {
       timestamp: timestamp.toString(),
       folder: folder || `portfolio/${resourceType}s`,
     };
-
-    // Add upload preset if configured (optional)
-    if (process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET) {
-      paramsToSign.upload_preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
-    }
 
     // Generate the signature using Cloudinary's utility
     const signature = cloudinary.utils.api_sign_request(paramsToSign, process.env.CLOUDINARY_API_SECRET!);
