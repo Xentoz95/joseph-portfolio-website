@@ -1,62 +1,70 @@
 /**
  * Admin Upload API Route
  *
- * Handles image and video uploads to Cloudinary
+ * Returns Cloudinary signature for direct browser uploads.
+ * This avoids server timeouts for large files by having the browser
+ * upload directly to Cloudinary.
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { uploadImage, uploadVideo } from '@/lib/cloudinary';
+import { cloudinary } from '@/lib/cloudinary';
 
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
-    const file = formData.get('file') as string | null;
-    const folder = formData.get('folder') as string | null;
     const fileType = formData.get('fileType') as string | null;
+    const folder = formData.get('folder') as string | null;
+    const fileName = formData.get('fileName') as string | null;
 
-    if (!file) {
+    if (!fileType) {
       return NextResponse.json(
-        { error: 'No file provided' },
+        { error: 'No file type provided' },
         { status: 400 }
       );
     }
 
-    // Ensure the file is a valid base64 data URL
-    let fileData = file;
-    if (!fileData.startsWith('data:')) {
-      // If it's not a data URL, assume it needs the prefix
-      fileData = `data:image/jpeg;base64,${fileData}`;
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const apiKey = process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY;
+
+    if (!cloudName || !apiKey) {
+      return NextResponse.json(
+        { error: 'Cloudinary is not configured' },
+        { status: 500 }
+      );
     }
 
     // Determine resource type
-    const isVideo = fileType === 'video' || file.startsWith('data:video/');
+    const resourceType = fileType === 'video' ? 'video' : 'image';
 
-    let result;
+    // Generate timestamp for the signature
+    const timestamp = Math.floor(Date.now() / 1000);
 
-    if (isVideo) {
-      // Upload video to Cloudinary
-      result = await uploadVideo(fileData, {
-        folder: folder || 'portfolio/videos',
-      });
-    } else {
-      // Upload image to Cloudinary
-      result = await uploadImage(fileData, {
-        folder: folder || 'portfolio',
-      });
+    // Build the parameters to sign
+    const paramsToSign: Record<string, string> = {
+      timestamp: timestamp.toString(),
+      folder: folder || `portfolio/${resourceType}s`,
+    };
+
+    // Add upload preset if configured (optional)
+    if (process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET) {
+      paramsToSign.upload_preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
     }
 
+    // Generate the signature using Cloudinary's utility
+    const signature = cloudinary.utils.api_sign_request(paramsToSign, process.env.CLOUDINARY_API_SECRET!);
+
     return NextResponse.json({
-      publicId: result.publicId,
-      url: result.url,
-      secureUrl: result.secureUrl,
-      ...(result.width && { width: result.width }),
-      ...(result.height && { height: result.height }),
-      ...(result.duration && { duration: result.duration }),
+      timestamp,
+      signature,
+      cloudName,
+      apiKey,
+      folder: paramsToSign.folder,
+      resourceType,
     });
   } catch (error) {
-    console.error('Error uploading file:', error);
+    console.error('Error generating upload signature:', error);
     return NextResponse.json(
-      { error: 'Failed to upload file', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Failed to generate upload signature', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }
