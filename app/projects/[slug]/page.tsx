@@ -10,10 +10,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ExternalLink, Github, Tag, Play } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Github, Tag } from 'lucide-react';
 import { Breadcrumb } from '@/components/seo/breadcrumb';
 import { Header } from '@/components/header';
-import { ProjectDetail } from '@/components/projects/project-detail';
 import fs from 'fs';
 import path from 'path';
 
@@ -114,7 +113,6 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             <div className="flex items-center gap-3 mb-4">
               <Badge variant="outline">{categoryNames[project.category] || project.category}</Badge>
               {project.featured && <Badge className="bg-primary/10 text-primary border-primary/20">Featured</Badge>}
-              {project.category === 'video' && <Badge className="bg-purple-600/10 text-purple-600 border-purple-600/20"><Play className="w-3 h-3 mr-1" />Video</Badge>}
             </div>
 
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-foreground mb-6 leading-tight">{project.title}</h1>
@@ -135,13 +133,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
         {project.thumbnail && (
           <section className="py-8 px-4 sm:px-6 lg:px-8">
             <div className="max-w-6xl mx-auto">
-              <ProjectDetail
-                src={project.thumbnail}
-                alt={project.alt || project.title}
-                title={project.title}
-                allMedia={project.gallery && project.gallery.length > 0 ? project.gallery : [project.thumbnail]}
-                currentIndex={0}
-              />
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-muted">
+                <Image src={project.thumbnail} alt={project.alt || project.title} fill className="object-cover" priority />
+              </div>
             </div>
           </section>
         )}
@@ -160,7 +154,7 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             <div className="max-w-6xl mx-auto">
               <div className="flex items-center gap-2 mb-4">
                 <Tag className="w-5 h-5 text-muted-foreground" />
-                <h2 className="text-sm font-semibold text-foreground">{project.technologies.length > 0 ? 'Tech Stack' : 'Tags'}</h2>
+                <h2 className="text-sm font-semibold text-foreground">Technologies</h2>
               </div>
               <div className="flex flex-wrap gap-2">
                 {[...project.technologies, ...project.tags].map((item) => (
@@ -177,7 +171,9 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
               <h2 className="text-2xl font-bold text-foreground mb-6">Project Gallery</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {project.gallery.map((imgSrc, index) => (
-                  <ProjectDetail key={index} src={imgSrc} alt={`${project.title} screenshot ${index + 1}`} title={project.title} allMedia={project.gallery} currentIndex={index} />
+                  <div key={index} className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted">
+                    <Image src={imgSrc} alt={`${project.title} ${index + 1}`} fill className="object-cover" />
+                  </div>
                 ))}
               </div>
             </div>
@@ -189,17 +185,17 @@ export default async function ProjectPage({ params }: ProjectPageProps) {
             <div className="max-w-6xl mx-auto">
               <h2 className="text-2xl font-bold text-foreground mb-6">Related Projects</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {relatedProjects.map((relatedProject) => (
-                  <Link key={relatedProject.id} href={`/projects/${relatedProject.slug}`} className="group">
+                {relatedProjects.map((rp) => (
+                  <Link key={rp.id} href={`/projects/${rp.slug}`} className="group">
                     <article className="bg-card rounded-lg overflow-hidden border border-border/50 hover:border-primary/50 transition-colors">
-                      {relatedProject.thumbnail && (
+                      {rp.thumbnail && (
                         <div className="relative aspect-video bg-muted">
-                          <Image src={relatedProject.thumbnail} alt={relatedProject.title} fill className="object-cover" />
+                          <Image src={rp.thumbnail} alt={rp.title} fill className="object-cover" />
                         </div>
                       )}
                       <div className="p-4">
-                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors mb-2">{relatedProject.title}</h3>
-                        <p className="text-sm text-muted-foreground line-clamp-2">{relatedProject.description}</p>
+                        <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors mb-2">{rp.title}</h3>
+                        <p className="text-sm text-muted-foreground line-clamp-2">{rp.description}</p>
                       </div>
                     </article>
                   </Link>
