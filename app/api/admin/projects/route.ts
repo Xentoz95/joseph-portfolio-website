@@ -20,18 +20,28 @@ async function supabaseFetch(endpoint: string, options: RequestInit = {}) {
 
 export async function GET() {
   try {
+    console.log('GET /api/admin/projects - Fetching from Supabase');
     const response = await supabaseFetch('/rest/v1/projects?select=*&order=created_at.desc');
+
+    if (!response.ok) {
+      const error = await response.text();
+      console.error('Supabase error:', response.status, error);
+      return NextResponse.json({ error: 'Failed to fetch projects', details: error }, { status: response.status });
+    }
+
     const data = await response.json();
+    console.log('Found projects:', data.length);
     return NextResponse.json(data || []);
   } catch (error) {
     console.error('Error fetching projects:', error);
-    return NextResponse.json([], { status: 500 });
+    return NextResponse.json({ error: String(error) }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
     const project = await request.json();
+    console.log('POST /api/admin/projects - Creating:', project.title);
 
     const images: ProjectImages = {
       thumbnail: project.thumbnail || null,
@@ -41,7 +51,7 @@ export async function POST(request: Request) {
     };
 
     const insertData = {
-      id: project.id,
+      id: project.id || `proj-${Date.now()}`,
       title: project.title,
       description: project.description,
       slug: project.slug || project.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
@@ -61,10 +71,11 @@ export async function POST(request: Request) {
 
     if (!response.ok) {
       const error = await response.text();
-      console.error('Error creating project:', error);
-      return NextResponse.json({ success: false, error }, { status: 500 });
+      console.error('Supabase POST error:', response.status, error);
+      return NextResponse.json({ success: false, error: error }, { status: response.status });
     }
 
+    console.log('Project created successfully');
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error creating project:', error);
@@ -79,6 +90,8 @@ export async function PUT(request: Request) {
     if (!project.id) {
       return NextResponse.json({ success: false, error: 'Project ID required' }, { status: 400 });
     }
+
+    console.log('PUT /api/admin/projects - Updating:', project.id);
 
     const images: ProjectImages = {
       thumbnail: project.thumbnail || null,
@@ -111,10 +124,11 @@ export async function PUT(request: Request) {
 
     if (!response.ok) {
       const error = await response.text();
-      console.error('Error updating project:', error);
-      return NextResponse.json({ success: false, error }, { status: 500 });
+      console.error('Supabase PUT error:', response.status, error);
+      return NextResponse.json({ success: false, error: error }, { status: response.status });
     }
 
+    console.log('Project updated successfully');
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error updating project:', error);
@@ -130,6 +144,8 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ success: false, error: 'Project ID required' }, { status: 400 });
     }
 
+    console.log('DELETE /api/admin/projects - Deleting:', id);
+
     const response = await supabaseFetch(
       `/rest/v1/projects?id=eq.${id}`,
       { method: 'DELETE' }
@@ -137,10 +153,11 @@ export async function DELETE(request: Request) {
 
     if (!response.ok) {
       const error = await response.text();
-      console.error('Error deleting project:', error);
-      return NextResponse.json({ success: false, error }, { status: 500 });
+      console.error('Supabase DELETE error:', response.status, error);
+      return NextResponse.json({ success: false, error: error }, { status: response.status });
     }
 
+    console.log('Project deleted successfully');
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Error deleting project:', error);
