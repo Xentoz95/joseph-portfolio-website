@@ -165,6 +165,28 @@ export function ProjectForm({ initialData, onSave, onCancel }: ProjectFormProps)
                       className="mt-1"
                     />
                   </div>
+                  <div>
+                    <Label htmlFor="liveUrl">Live URL</Label>
+                    <Input
+                      id="liveUrl"
+                      type="text"
+                      value={formData.liveUrl || ''}
+                      onChange={(e) => setFormData({ ...formData, liveUrl: e.target.value })}
+                      placeholder="https://yoursite.com"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="githubUrl">GitHub URL</Label>
+                    <Input
+                      id="githubUrl"
+                      type="text"
+                      value={formData.githubUrl || ''}
+                      onChange={(e) => setFormData({ ...formData, githubUrl: e.target.value })}
+                      placeholder="https://github.com/username/repo"
+                      className="mt-1"
+                    />
+                  </div>
                 </div>
               </div>
             </div>

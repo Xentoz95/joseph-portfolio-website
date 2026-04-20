@@ -16,9 +16,26 @@ type PostgrestError = {
 };
 
 /**
- * Fallback posts data when database is not available
+ * Fallback posts data when database is not available - reads from local JSON
  */
-const FALLBACK_POSTS: Post[] = [
+async function getFallbackPosts(): Promise<Post[]> {
+  try {
+    const fs = require('fs');
+    const path = require('path');
+    const filePath = path.join(process.cwd(), 'data', 'posts-data.json');
+    const fileContent = fs.readFileSync(filePath, 'utf-8');
+    const posts = JSON.parse(fileContent);
+    return posts as Post[];
+  } catch (error) {
+    console.error('Error reading fallback posts from JSON:', error);
+    return [];
+  }
+}
+
+/**
+ * Synchronous fallback posts for backward compatibility
+ */
+const FALLBACK_POSTS_STATIC: Post[] = [
   {
     id: '1',
     title: 'Getting Started with Modern Web Development',
@@ -94,7 +111,8 @@ export async function getPosts(options: {
 
     if (error) {
       console.warn('Database not available, using fallback data');
-      let result = FALLBACK_POSTS;
+      const fallbackPosts = await getFallbackPosts();
+      let result = fallbackPosts;
       if (options.limit) {
         result = result.slice(0, options.limit);
       }
@@ -107,7 +125,8 @@ export async function getPosts(options: {
     return (data || []) as Post[];
   } catch (error) {
     console.error('Error fetching posts:', error);
-    let result = FALLBACK_POSTS;
+    const fallbackPosts = await getFallbackPosts();
+    let result = fallbackPosts;
     if (options.limit) {
       result = result.slice(0, options.limit);
     }
@@ -135,13 +154,17 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 
     if (error) {
       console.warn(`Database not available, using fallback data for slug "${slug}"`);
-      return FALLBACK_POSTS.find(p => p.slug === slug) || null;
+      // Try to find in local JSON fallback
+      const fallbackPosts = await getFallbackPosts();
+      return fallbackPosts.find(p => p.slug === slug) || null;
     }
 
     return data as Post | null;
   } catch (error) {
     console.error(`Error fetching post with slug "${slug}":`, error);
-    return FALLBACK_POSTS.find(p => p.slug === slug) || null;
+    // Try to find in local JSON fallback
+    const fallbackPosts = await getFallbackPosts();
+    return fallbackPosts.find(p => p.slug === slug) || null;
   }
 }
 
@@ -275,7 +298,11 @@ export async function getRelatedPosts(
 
   if (error) {
     console.error(`Error fetching related posts for "${currentSlug}":`, error);
-    return [];
+    // Fallback to local JSON
+    const fallbackPosts = await getFallbackPosts();
+    return fallbackPosts
+      .filter(p => p.slug !== currentSlug && p.published)
+      .slice(0, limit);
   }
 
   return (data || []) as Post[];

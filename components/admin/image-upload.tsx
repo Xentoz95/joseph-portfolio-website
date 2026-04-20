@@ -37,15 +37,15 @@ export function ImageUpload({
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
+    // Validate file type - accept all image types
     if (!file.type.startsWith('image/')) {
       toast.error('Please select an image file');
       return;
     }
 
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Image must be less than 5MB');
+    // Validate file size (max 50MB for all image types)
+    if (file.size > 50 * 1024 * 1024) {
+      toast.error('Image must be less than 50MB');
       return;
     }
 
@@ -70,14 +70,17 @@ export function ImageUpload({
         }, 200);
 
         try {
-          // Upload to server
-          const formData = new FormData();
-          formData.append('file', base64);
-          formData.append('folder', folder);
-
+          // Upload to server using JSON (more reliable than FormData for base64)
           const response = await fetch('/api/admin/upload', {
             method: 'POST',
-            body: formData,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              file: base64,
+              folder: folder,
+              fileType: 'image',
+            }),
           });
 
           if (!response.ok) {
@@ -170,7 +173,7 @@ export function ImageUpload({
             Click to upload an image
           </p>
           <p className="text-xs text-muted-foreground text-center mt-1">
-            PNG, JPG up to 5MB
+            All image types up to 50MB
           </p>
         </div>
       )}

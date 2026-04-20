@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { FadeIn } from './FadeIn';
 import { about } from '@/data';
-import { ExternalLink, Github, ArrowRight } from 'lucide-react';
+import { ExternalLink, Github, ArrowRight, X, ZoomIn, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
 // Project type matching local JSON
@@ -32,14 +32,16 @@ const categories = [
   { value: 'web', label: 'Web' },
   { value: 'system', label: 'Systems' },
   { value: 'dashboard', label: 'Dashboards' },
-  { value: 'branding', label: 'Branding' },
   { value: 'design', label: 'Design' },
+  { value: 'video', label: 'Videos' },
 ];
 
 export function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
+  const [fullscreenIndex, setFullscreenIndex] = useState(0);
 
   useEffect(() => {
     fetchProjects();
@@ -64,6 +66,27 @@ export function Projects() {
 
   const featuredProjects = filteredProjects.filter(p => p.featured).slice(0, 6);
   const displayProjects = featuredProjects.length > 0 ? featuredProjects : filteredProjects.slice(0, 6);
+
+  // Get all thumbnails for navigation
+  const allThumbnails = displayProjects.map(p => p.thumbnail).filter(Boolean);
+
+  const openFullscreen = (thumbnail: string) => {
+    const index = allThumbnails.indexOf(thumbnail);
+    setFullscreenIndex(index >= 0 ? index : 0);
+    setFullscreenImage(thumbnail);
+  };
+
+  const goToPreviousImage = () => {
+    const newIndex = fullscreenIndex === 0 ? allThumbnails.length - 1 : fullscreenIndex - 1;
+    setFullscreenIndex(newIndex);
+    setFullscreenImage(allThumbnails[newIndex]);
+  };
+
+  const goToNextImage = () => {
+    const newIndex = fullscreenIndex === allThumbnails.length - 1 ? 0 : fullscreenIndex + 1;
+    setFullscreenIndex(newIndex);
+    setFullscreenImage(allThumbnails[newIndex]);
+  };
 
   return (
     <section id="projects" className="py-20 px-4 sm:px-6 lg:px-8 bg-card relative overflow-hidden">
@@ -115,14 +138,16 @@ export function Projects() {
               <FadeIn key={project.id} delay={index * 100}>
                 <div className="bg-background rounded-2xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 group h-full flex flex-col">
                   {/* Image */}
-                  <div className="relative h-48 overflow-hidden">
+                  <div className="relative h-48 overflow-hidden cursor-zoom-in" onClick={() => { if (project.thumbnail) openFullscreen(project.thumbnail); }}>
                     <Image
                       src={project.thumbnail || '/images/placeholder.png'}
                       alt={project.alt || project.title}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none">
+                      <ZoomIn className="w-8 h-8 text-white" />
+                    </div>
                   </div>
 
                   {/* Content */}
@@ -210,6 +235,55 @@ export function Projects() {
           </div>
         </div>
       </div>
+
+      {/* Fullscreen Image Preview */}
+      {fullscreenImage && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4"
+          onClick={() => setFullscreenImage(null)}
+        >
+          <button
+            onClick={() => setFullscreenImage(null)}
+            className="absolute top-4 right-4 z-50 p-2 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
+
+          {/* Previous button */}
+          {allThumbnails.length > 1 && (
+            <button
+              onClick={(e) => { e.stopPropagation(); goToPreviousImage(); }}
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
+            >
+              <ChevronLeft className="w-8 h-8" />
+            </button>
+          )}
+
+          {/* Next button */}
+          {allThumbnails.length > 1 && (
+            <button
+              onClick={(e) => { e.stopPropagation(); goToNextImage(); }}
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
+            >
+              <ChevronRight className="w-8 h-8" />
+            </button>
+          )}
+
+          {/* Counter */}
+          {allThumbnails.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-black/50 rounded-full text-white text-sm">
+              {fullscreenIndex + 1} / {allThumbnails.length}
+            </div>
+          )}
+
+          <img
+            src={fullscreenImage}
+            alt="Fullscreen preview"
+            className="max-w-full max-h-[90vh] object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </section>
   );
 }
