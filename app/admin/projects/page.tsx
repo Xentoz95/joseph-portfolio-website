@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Admin Projects Page - Local JSON Based
+ * Admin Projects Page - Supabase Based
  *
  * Manage projects without coding! Add, edit, and delete projects.
  */
@@ -16,7 +16,7 @@ import { Plus, Trash2, Edit, Eye, EyeOff, Image as ImageIcon } from 'lucide-reac
 import Image from 'next/image';
 import { ProjectForm } from '@/components/admin/project-form';
 
-// Project type
+// Project type (flat format for component)
 interface Project {
   id: string;
   slug: string;
@@ -36,12 +36,53 @@ interface Project {
   published: boolean;
 }
 
-// Load projects from API
+// Transform flat project to Supabase format
+function toSupabaseFormat(project: Partial<Project>) {
+  return {
+    id: project.id || `proj-${Date.now()}`,
+    title: project.title || '',
+    description: project.description || '',
+    slug: project.slug || (project.title || '').toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+    tags: project.tags || [],
+    images: {
+      thumbnail: project.thumbnail || null,
+      hero: project.hero || null,
+      gallery: project.gallery || [],
+      alt: project.alt || project.title || '',
+    },
+    demo_url: project.liveUrl || null,
+    repo_url: project.githubUrl || null,
+    featured: project.featured || false,
+    category: project.category || 'web',
+    published_at: project.published ? (project.published_at || new Date().toISOString()) : null,
+  };
+}
+
+// Load projects from Supabase via API
 async function loadProjects(): Promise<Project[]> {
   try {
-    const response = await fetch('/api/projects');
+    const response = await fetch('/api/admin/projects');
     if (response.ok) {
-      return await response.json();
+      const data = await response.json();
+      // Transform from Supabase format to flat format
+      return data.map((p: any) => ({
+        id: p.id,
+        slug: p.slug,
+        title: p.title,
+        description: p.description,
+        longDescription: '',
+        category: p.category,
+        tags: p.tags || [],
+        thumbnail: p.images?.thumbnail || '',
+        hero: p.images?.hero || '',
+        gallery: p.images?.gallery || [],
+        alt: p.images?.alt || p.title,
+        featured: p.featured,
+        technologies: [],
+        liveUrl: p.demo_url || '',
+        githubUrl: p.repo_url || '',
+        published: p.published_at !== null,
+      }));
     }
   } catch (e) {
     console.error('Error loading projects:', e);
@@ -49,23 +90,33 @@ async function loadProjects(): Promise<Project[]> {
   return [];
 }
 
-// Save projects to API
-async function saveProjects(projects: Project[]): Promise<boolean> {
+// Save project to Supabase
+async function saveProject(project: Partial<Project>, isNew: boolean): Promise<boolean> {
   try {
-    // Save to API
-    const response = await fetch('/api/projects', {
-      method: 'POST',
+    const method = isNew ? 'POST' : 'PUT';
+    const response = await fetch('/api/admin/projects', {
+      method,
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(projects),
+      body: JSON.stringify(project),
     });
-    if (response.ok) {
-      // Also save to localStorage as backup
-      localStorage.setItem('portfolio-projects', JSON.stringify(projects));
-      return true;
-    }
-    return false;
+    return response.ok;
   } catch (e) {
-    console.error('Error saving projects:', e);
+    console.error('Error saving project:', e);
+    return false;
+  }
+}
+
+// Delete project from Supabase
+async function deleteProject(id: string): Promise<boolean> {
+  try {
+    const response = await fetch('/api/admin/projects', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
+    return response.ok;
+  } catch (e) {
+    console.error('Error deleting project:', e);
     return false;
   }
 }
@@ -84,26 +135,7 @@ export default function AdminProjectsPage() {
   const loadProjectsData = async () => {
     setLoading(true);
     const data = await loadProjects();
-
-    // Check localStorage for any user-added projects
-    const stored = localStorage.getItem('portfolio-projects');
-    if (stored) {
-      try {
-        const userProjects = JSON.parse(stored);
-        // Merge with default projects
-        const merged = [...data];
-        userProjects.forEach((p: Project) => {
-          if (!merged.find(x => x.id === p.id)) {
-            merged.push(p);
-          }
-        });
-        setProjects(merged);
-      } catch {
-        setProjects(data);
-      }
-    } else {
-      setProjects(data);
-    }
+    setProjects(data);
     setLoading(false);
   };
 
@@ -185,21 +217,13 @@ export default function AdminProjectsPage() {
     savedData.tags = savedData.tags || [];
     savedData.technologies = savedData.technologies || [];
 
-    const existingIndex = projects.findIndex(p => p.id === savedData.id);
-    let updatedProjects = [...projects];
-
-    if (existingIndex >= 0) {
-      updatedProjects[existingIndex] = savedData as Project;
-    } else {
-      updatedProjects.push(savedData as Project);
-    }
-
-    const success = await saveProjects(updatedProjects);
+    const isNew = !projects.find(p => p.id === savedData.id);
+    const success = await saveProject(savedData, isNew);
     if (success) {
-      setProjects(updatedProjects);
+      await loadProjectsData();
       toast({
         title: 'Success',
-        description: 'Project saved!',
+        description: 'Project saved to database!',
       });
       setEditingId(null);
       setIsCreating(false);
@@ -223,10 +247,9 @@ export default function AdminProjectsPage() {
     if (!confirm('Are you sure you want to delete this project?')) {
       return;
     }
-    const updatedProjects = projects.filter(p => p.id !== id);
-    const success = await saveProjects(updatedProjects);
+    const success = await deleteProject(id);
     if (success) {
-      setProjects(updatedProjects);
+      await loadProjectsData();
       toast({
         title: 'Success',
         description: 'Project deleted',
@@ -241,12 +264,10 @@ export default function AdminProjectsPage() {
   };
 
   const handleTogglePublish = async (project: Project) => {
-    const updatedProjects = projects.map(p =>
-      p.id === project.id ? { ...p, published: !p.published } : p
-    );
-    const success = await saveProjects(updatedProjects);
+    const updated = { ...project, published: !project.published };
+    const success = await saveProject(updated, false);
     if (success) {
-      setProjects(updatedProjects);
+      await loadProjectsData();
       toast({
         title: 'Success',
         description: project.published ? 'Project unpublished' : 'Project published',
