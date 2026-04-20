@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { Play, X, ZoomIn, ChevronLeft, ChevronRight, Maximize2, Minimize2 } from 'lucide-react';
+import { Play, X, ZoomIn, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface ProjectDetailProps {
   src: string;
@@ -16,7 +15,6 @@ interface ProjectDetailProps {
 export function ProjectDetail({ src, alt, title, allMedia = [], currentIndex = 0 }: ProjectDetailProps) {
   const [viewing, setViewing] = useState(false);
   const [mediaIndex, setMediaIndex] = useState(currentIndex);
-  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const mediaItems = allMedia.length > 0 ? allMedia : [src];
 
@@ -107,11 +105,12 @@ export function ProjectDetail({ src, alt, title, allMedia = [], currentIndex = 0
         )}
       </div>
 
-      {/* Viewer Dialog */}
-      <Dialog open={viewing} onOpenChange={setViewing}>
-        <DialogContent className={`${isFullscreen ? '!max-w-[100vw] !max-h-[100vh] !w-screen !h-screen' : 'max-w-6xl max-h-[90vh]'} p-0 bg-black/95 border-none`}>
-          <DialogTitle className="sr-only">{title}</DialogTitle>
-
+      {/* Fullscreen Media Viewer */}
+      {viewing && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4"
+          onClick={() => setViewing(false)}
+        >
           {/* Close button */}
           <button
             onClick={() => setViewing(false)}
@@ -120,18 +119,10 @@ export function ProjectDetail({ src, alt, title, allMedia = [], currentIndex = 0
             <X className="w-6 h-6" />
           </button>
 
-          {/* Fullscreen toggle */}
-          <button
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            className="absolute top-4 right-16 z-50 p-2 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
-          >
-            {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
-          </button>
-
           {/* Previous button */}
           {mediaItems.length > 1 && (
             <button
-              onClick={goToPrevious}
+              onClick={(e) => { e.stopPropagation(); goToPrevious(); }}
               className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
             >
               <ChevronLeft className="w-8 h-8" />
@@ -141,7 +132,7 @@ export function ProjectDetail({ src, alt, title, allMedia = [], currentIndex = 0
           {/* Next button */}
           {mediaItems.length > 1 && (
             <button
-              onClick={goToNext}
+              onClick={(e) => { e.stopPropagation(); goToNext(); }}
               className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
             >
               <ChevronRight className="w-8 h-8" />
@@ -162,10 +153,11 @@ export function ProjectDetail({ src, alt, title, allMedia = [], currentIndex = 0
                 src={mediaItems[mediaIndex]}
                 controls
                 autoPlay
-                className={`${isFullscreen ? 'w-screen h-screen' : 'w-full h-full max-h-[85vh]'} object-contain`}
+                className="max-w-full max-h-[90vh] object-contain"
+                onClick={(e) => e.stopPropagation()}
               />
             ) : (
-              <div className={`relative ${isFullscreen ? 'w-screen h-screen' : 'w-full h-full max-h-[85vh]'}`}>
+              <div className="relative w-full h-full max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
                 <Image
                   src={mediaItems[mediaIndex]}
                   alt={alt}
@@ -177,8 +169,8 @@ export function ProjectDetail({ src, alt, title, allMedia = [], currentIndex = 0
               </div>
             )
           )}
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
     </>
   );
 }

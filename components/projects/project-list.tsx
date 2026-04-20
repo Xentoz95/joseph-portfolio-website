@@ -5,8 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Github, Play, X, ZoomIn, ChevronLeft, ChevronRight, Maximize2, Minimize2 } from 'lucide-react';
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { ExternalLink, Github, Play, X, ZoomIn, ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Project as DbProject, ProjectImages } from '@/types/database';
 
 interface ProjectImages {
@@ -81,7 +80,6 @@ export function ProjectList({ projects }: ProjectListProps) {
   const [viewingMedia, setViewingMedia] = useState<MediaItem | null>(null);
   const [mediaIndex, setMediaIndex] = useState(0);
   const [currentProjectMedia, setCurrentProjectMedia] = useState<MediaItem[]>([]);
-  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Adapt all projects to component format
   const adaptedProjects = projects.map(adaptProject);
@@ -288,31 +286,24 @@ export function ProjectList({ projects }: ProjectListProps) {
         ))}
       </div>
 
-      {/* Media Viewer Dialog */}
-      <Dialog open={!!viewingMedia} onOpenChange={() => { setViewingMedia(null); setIsFullscreen(false); }}>
-        <DialogContent className={`${isFullscreen ? '!max-w-[100vw] !max-h-[100vh] !w-screen !h-screen' : 'max-w-6xl max-h-[90vh]'} p-0 bg-black/95 border-none`}>
-          <DialogTitle className="sr-only">{viewingMedia?.title}</DialogTitle>
-
+      {/* Fullscreen Media Viewer */}
+      {viewingMedia && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4"
+          onClick={() => setViewingMedia(null)}
+        >
           {/* Close button */}
           <button
-            onClick={() => { setViewingMedia(null); setIsFullscreen(false); }}
+            onClick={() => setViewingMedia(null)}
             className="absolute top-4 right-4 z-50 p-2 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
 
-          {/* Fullscreen toggle */}
-          <button
-            onClick={() => setIsFullscreen(!isFullscreen)}
-            className="absolute top-4 right-16 z-50 p-2 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
-          >
-            {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
-          </button>
-
           {/* Navigation - Previous */}
           {currentProjectMedia.length > 1 && (
             <button
-              onClick={goToPrevious}
+              onClick={(e) => { e.stopPropagation(); goToPrevious(); }}
               className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
             >
               <ChevronLeft className="w-8 h-8" />
@@ -322,7 +313,7 @@ export function ProjectList({ projects }: ProjectListProps) {
           {/* Navigation - Next */}
           {currentProjectMedia.length > 1 && (
             <button
-              onClick={goToNext}
+              onClick={(e) => { e.stopPropagation(); goToNext(); }}
               className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
             >
               <ChevronRight className="w-8 h-8" />
@@ -343,18 +334,20 @@ export function ProjectList({ projects }: ProjectListProps) {
                 src={viewingMedia.src}
                 controls
                 autoPlay
-                className={`${isFullscreen ? 'w-screen h-screen' : 'w-full h-full max-h-[85vh]'} object-contain`}
+                className="max-w-full max-h-[90vh] object-contain"
+                onClick={(e) => e.stopPropagation()}
               />
             ) : (
               <img
                 src={viewingMedia.src}
                 alt={viewingMedia.title || ''}
-                className={`${isFullscreen ? 'w-screen h-screen' : 'max-w-full max-h-[85vh]'} object-contain`}
+                className="max-w-full max-h-[90vh] object-contain"
+                onClick={(e) => e.stopPropagation()}
               />
             )
           )}
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
     </>
   );
 }
