@@ -1,8 +1,7 @@
 /**
- * Projects Listing Page - Local JSON Based
+ * Projects Listing Page - Uses Local JSON Data
  *
  * Displays all projects with filtering by tags and search functionality.
- * Uses local JSON data - no database needed!
  */
 
 import type { Metadata } from 'next';
@@ -11,51 +10,15 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Filter, Search, ExternalLink, Github } from 'lucide-react';
+import { Filter, Search, ExternalLink, Github, Play } from 'lucide-react';
 import { Header } from '@/components/header';
-import fs from 'fs';
-import path from 'path';
-
-// Project type
-interface Project {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  longDescription: string;
-  category: string;
-  tags: string[];
-  thumbnail: string;
-  hero: string;
-  gallery: string[];
-  alt: string;
-  featured: boolean;
-  technologies: string[];
-  liveUrl: string;
-  githubUrl: string;
-  published: boolean;
-}
-
-// Load projects from local JSON
-async function getProjects(): Promise<Project[]> {
-  try {
-    const filePath = path.join(process.cwd(), 'data', 'projects-data.json');
-    const fileContent = fs.readFileSync(filePath, 'utf-8');
-    return JSON.parse(fileContent);
-  } catch (error) {
-    console.error('Error loading projects:', error);
-    return [];
-  }
-}
+import { getProjects, getAllTags as getTagsFromDb } from '@/lib/supabase/projects';
+import { ProjectList } from '@/components/projects/project-list';
+import type { Project } from '@/types/database';
 
 // Get all unique tags
 async function getAllTags(): Promise<string[]> {
-  const projects = await getProjects();
-  const tags = new Set<string>();
-  projects.forEach((p) => {
-    p.tags.forEach((t) => tags.add(t));
-  });
-  return Array.from(tags).sort();
+  return await getTagsFromDb();
 }
 
 export const metadata: Metadata = {
@@ -99,9 +62,6 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
         p.tags.some((t) => t.toLowerCase().includes(searchLower))
     );
   }
-
-  // Only show published projects
-  projects = projects.filter((p) => p.published);
 
   return (
     <>
@@ -220,89 +180,7 @@ export default async function ProjectsPage({ searchParams }: ProjectsPageProps) 
             )}
 
             {/* Projects Grid */}
-            {projects.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {projects.map((project) => (
-                  <div
-                    key={project.id}
-                    className="bg-card rounded-2xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 group flex flex-col"
-                  >
-                    {/* Image */}
-                    <div className="relative h-48 overflow-hidden">
-                      <Image
-                        src={project.thumbnail || '/images/placeholder.png'}
-                        alt={project.alt || project.title}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    </div>
-
-                    {/* Content */}
-                    <div className="p-6 flex-1 flex flex-col">
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {project.tags.slice(0, 3).map((tag) => (
-                          <span
-                            key={tag}
-                            className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full"
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-
-                      <h2 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-                        {project.title}
-                      </h2>
-                      <p className="text-sm text-muted-foreground flex-1 line-clamp-3 mb-4">
-                        {project.description}
-                      </p>
-
-                      {/* Links */}
-                      <div className="flex gap-4 pt-4 border-t border-border/50">
-                        {project.liveUrl && project.liveUrl !== '#' && (
-                          <a
-                            href={project.liveUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-sm text-primary hover:underline"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                            Demo
-                          </a>
-                        )}
-                        {project.githubUrl && project.githubUrl !== '#' && (
-                          <a
-                            href={project.githubUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-sm text-primary hover:underline"
-                          >
-                            <Github className="w-4 h-4" />
-                            Code
-                          </a>
-                        )}
-                        <Link
-                          href={`/projects/${project.slug}`}
-                          className="flex items-center gap-1 text-sm text-primary hover:underline ml-auto"
-                        >
-                          View Details
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-16">
-                <p className="text-muted-foreground text-lg mb-4">
-                  No projects found matching your criteria.
-                </p>
-                <Button variant="outline" asChild>
-                  <Link href="/projects">Clear all filters</Link>
-                </Button>
-              </div>
-            )}
+            <ProjectList projects={projects} />
 
             {/* Results Count */}
             <div className="mt-8 text-sm text-muted-foreground">
