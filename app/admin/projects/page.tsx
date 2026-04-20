@@ -1,9 +1,10 @@
 'use client';
 
 /**
- * Admin Projects Page - Uses Supabase Directly
+ * Admin Projects Page - LocalStorage Based
  *
- * Manages projects using Supabase browser client directly.
+ * Manages projects locally and exports to JSON for the website.
+ * Works on Vercel without needing Supabase.
  */
 
 import { useState, useEffect } from 'react';
@@ -12,15 +13,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AdminAuth } from '@/components/admin/admin-auth';
-import { Plus, Trash2, Edit, Eye, EyeOff, Image as ImageIcon } from 'lucide-react';
+import { Plus, Trash2, Edit, Eye, EyeOff, Download, Image as ImageIcon, Copy } from 'lucide-react';
 import Image from 'next/image';
 import { ProjectForm } from '@/components/admin/project-form';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 // Project type
 interface Project {
@@ -40,53 +35,9 @@ interface Project {
   liveUrl: string;
   githubUrl: string;
   published: boolean;
-  published_at?: string | null;
 }
 
-// Transform Supabase project to flat format
-function fromDbProject(p: any): Project {
-  return {
-    id: p.id,
-    slug: p.slug,
-    title: p.title,
-    description: p.description,
-    longDescription: '',
-    category: p.category,
-    tags: p.tags || [],
-    thumbnail: p.images?.thumbnail || '',
-    hero: p.images?.hero || '',
-    gallery: p.images?.gallery || [],
-    alt: p.images?.alt || p.title,
-    featured: p.featured,
-    technologies: [],
-    liveUrl: p.demo_url || '',
-    githubUrl: p.repo_url || '',
-    published: p.published_at !== null,
-    published_at: p.published_at,
-  };
-}
-
-// Transform flat project to Supabase format
-function toDbProject(project: Partial<Project>) {
-  return {
-    id: project.id,
-    title: project.title,
-    description: project.description,
-    slug: project.slug || project.title?.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '') || '',
-    tags: project.tags || [],
-    images: {
-      thumbnail: project.thumbnail || null,
-      hero: project.hero || null,
-      gallery: project.gallery || [],
-      alt: project.alt || project.title || '',
-    },
-    demo_url: project.liveUrl || null,
-    repo_url: project.githubUrl || null,
-    featured: project.featured || false,
-    category: project.category || 'web',
-    published_at: project.published ? (project.published_at || new Date().toISOString()) : null,
-  };
-}
+const STORAGE_KEY = 'portfolio-projects';
 
 export default function AdminProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -95,20 +46,24 @@ export default function AdminProjectsPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [formData, setFormData] = useState<Partial<Project>>({});
 
-  const loadProjects = async () => {
+  // Load from localStorage
+  const loadProjects = () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('projects')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error loading:', error);
-      toast({ title: 'Error', description: 'Failed to load projects', variant: 'destructive' });
-    } else {
-      setProjects((data || []).map(fromDbProject));
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      try {
+        setProjects(JSON.parse(stored));
+      } catch {
+        setProjects([]);
+      }
     }
     setLoading(false);
+  };
+
+  // Save to localStorage
+  const saveProjects = (projects: Project[]) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+    setProjects(projects);
   };
 
   useEffect(() => {
@@ -134,7 +89,7 @@ export default function AdminProjectsPage() {
       technologies: [],
       liveUrl: '#',
       githubUrl: '#',
-      published: false,
+      published: true,
     });
   };
 
@@ -149,49 +104,29 @@ export default function AdminProjectsPage() {
       toast({ title: 'Error', description: 'Title is required', variant: 'destructive' });
       return;
     }
-
     if (!savedData.description) {
       toast({ title: 'Error', description: 'Slogan is required', variant: 'destructive' });
       return;
     }
-
-    if ((savedData.category === 'web' || savedData.category === 'system') && !savedData.thumbnail) {
-      toast({ title: 'Error', description: 'Screenshot/preview image is required', variant: 'destructive' });
-      return;
-    }
-
-    if ((savedData.category === 'design' || savedData.category === 'video') && !savedData.thumbnail) {
-      toast({ title: 'Error', description: 'Please upload an image or video', variant: 'destructive' });
-      return;
-    }
-
     if (!savedData.slug) {
       savedData.slug = savedData.title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
     }
-
     savedData.tags = savedData.tags || [];
     savedData.technologies = savedData.technologies || [];
 
-    const isNew = !projects.find(p => p.id === savedData.id);
-    const dbProject = toDbProject(savedData);
-
-    let result;
-    if (isNew) {
-      result = await supabase.from('projects').insert(dbProject);
+    const existingIndex = projects.findIndex(p => p.id === savedData.id);
+    let updatedProjects = [...projects];
+    if (existingIndex >= 0) {
+      updatedProjects[existingIndex] = savedData as Project;
     } else {
-      result = await supabase.from('projects').update({ ...dbProject, updated_at: new Date().toISOString() }).eq('id', savedData.id);
+      updatedProjects.push(savedData as Project);
     }
 
-    if (result.error) {
-      console.error('Save error:', result.error);
-      toast({ title: 'Error', description: result.error.message, variant: 'destructive' });
-    } else {
-      await loadProjects();
-      toast({ title: 'Success', description: 'Project saved!' });
-      setEditingId(null);
-      setIsCreating(false);
-      setFormData({});
-    }
+    saveProjects(updatedProjects);
+    toast({ title: 'Success', description: 'Project saved!' });
+    setEditingId(null);
+    setIsCreating(false);
+    setFormData({});
   };
 
   const handleFormCancel = () => {
@@ -200,33 +135,27 @@ export default function AdminProjectsPage() {
     setFormData({});
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this project?')) return;
-
-    const { error } = await supabase.from('projects').delete().eq('id', id);
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    } else {
-      await loadProjects();
-      toast({ title: 'Success', description: 'Project deleted' });
-    }
+  const handleDelete = (id: string) => {
+    if (!confirm('Are you sure?')) return;
+    const updatedProjects = projects.filter(p => p.id !== id);
+    saveProjects(updatedProjects);
+    toast({ title: 'Success', description: 'Project deleted' });
   };
 
-  const handleTogglePublish = async (project: Project) => {
-    const { error } = await supabase
-      .from('projects')
-      .update({
-        published_at: project.published ? null : new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', project.id);
+  const handleTogglePublish = (project: Project) => {
+    const updatedProjects = projects.map(p =>
+      p.id === project.id ? { ...p, published: !p.published } : p
+    );
+    saveProjects(updatedProjects);
+    toast({ title: 'Success', description: project.published ? 'Project unpublished' : 'Project published' });
+  };
 
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    } else {
-      await loadProjects();
-      toast({ title: 'Success', description: project.published ? 'Project unpublished' : 'Project published' });
-    }
+  // Export to JSON format
+  const handleExport = () => {
+    const publishedProjects = projects.filter(p => p.published);
+    const json = JSON.stringify(publishedProjects, null, 2);
+    navigator.clipboard.writeText(json);
+    toast({ title: 'Copied!', description: 'JSON copied to clipboard. Paste this into data/projects-data.json' });
   };
 
   return (
@@ -239,13 +168,27 @@ export default function AdminProjectsPage() {
               Manage your portfolio projects
             </p>
           </div>
-          {!isCreating && !editingId && (
-            <Button onClick={handleCreate}>
-              <Plus className="mr-2 h-4 w-4" />
-              New Project
+          <div className="flex gap-2">
+            {!isCreating && !editingId && (
+              <Button onClick={handleCreate}>
+                <Plus className="mr-2 h-4 w-4" />
+                New Project
+              </Button>
+            )}
+            <Button variant="outline" onClick={handleExport}>
+              <Copy className="mr-2 h-4 w-4" />
+              Copy JSON
             </Button>
-          )}
+          </div>
         </div>
+
+        <Card className="bg-blue-50 border-blue-200">
+          <CardContent className="p-4">
+            <p className="text-sm text-blue-800">
+              <strong>How to publish:</strong> Click "Copy JSON", then paste the content into your <code>data/projects-data.json</code> file and push to GitHub.
+            </p>
+          </CardContent>
+        </Card>
 
         {(isCreating || editingId) && (
           <ProjectForm
@@ -257,7 +200,7 @@ export default function AdminProjectsPage() {
 
         {loading ? (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Loading projects...</p>
+            <p className="text-muted-foreground">Loading...</p>
           </div>
         ) : projects.length === 0 ? (
           <Card>
@@ -295,7 +238,7 @@ export default function AdminProjectsPage() {
                         <div className="flex gap-2 flex-shrink-0">
                           {project.featured && <Badge className="bg-primary">Featured</Badge>}
                           {project.published ? (
-                            <Badge variant="default" className="bg-green-600">Published</Badge>
+                            <Badge className="bg-green-600">Published</Badge>
                           ) : (
                             <Badge variant="secondary">Draft</Badge>
                           )}
@@ -326,20 +269,6 @@ export default function AdminProjectsPage() {
             ))}
           </div>
         )}
-
-        <Card className="bg-muted/50">
-          <CardContent className="p-6">
-            <h3 className="font-bold text-lg mb-2 flex items-center gap-2">
-              <ImageIcon className="w-5 h-5" />
-              How to Add Images
-            </h3>
-            <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
-              <li>Click on the image upload area in the form</li>
-              <li>Drag & drop an image or paste a URL</li>
-              <li>For best results, use images from Cloudinary or similar</li>
-            </ol>
-          </CardContent>
-        </Card>
       </div>
     </AdminAuth>
   );
