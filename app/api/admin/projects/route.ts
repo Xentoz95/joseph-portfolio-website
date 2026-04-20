@@ -1,11 +1,30 @@
 import { NextResponse } from 'next/server';
-import type { ProjectImages } from '@/types/database';
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+interface ProjectImages {
+  thumbnail: string | null;
+  hero: string | null;
+  gallery: string[];
+  alt: string;
+}
+
+// Debug helper
+function log(...args: any[]) {
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[Admin Projects API]', ...args);
+  }
+}
 
 async function supabaseFetch(endpoint: string, options: RequestInit = {}) {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error(`Missing env vars: URL=${!!SUPABASE_URL}, KEY=${!!SUPABASE_SERVICE_ROLE_KEY}`);
+  }
+
   const url = `${SUPABASE_URL}${endpoint}`;
+  log('Fetching:', url);
+
   const response = await fetch(url, {
     ...options,
     headers: {
@@ -15,33 +34,56 @@ async function supabaseFetch(endpoint: string, options: RequestInit = {}) {
       ...options.headers,
     },
   });
+
+  log('Response status:', response.status);
   return response;
 }
 
 export async function GET() {
   try {
-    console.log('GET /api/admin/projects - Fetching from Supabase');
+    log('GET /api/admin/projects');
+
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      return NextResponse.json(
+        { error: 'Server misconfigured: Missing Supabase environment variables' },
+        { status: 500 }
+      );
+    }
+
     const response = await supabaseFetch('/rest/v1/projects?select=*&order=created_at.desc');
 
     if (!response.ok) {
       const error = await response.text();
-      console.error('Supabase error:', response.status, error);
-      return NextResponse.json({ error: 'Failed to fetch projects', details: error }, { status: response.status });
+      log('Supabase error:', error);
+      return NextResponse.json(
+        { error: 'Failed to fetch projects', details: error },
+        { status: response.status }
+      );
     }
 
     const data = await response.json();
-    console.log('Found projects:', data.length);
+    log('Found projects:', data.length);
     return NextResponse.json(data || []);
-  } catch (error) {
-    console.error('Error fetching projects:', error);
-    return NextResponse.json({ error: String(error) }, { status: 500 });
+  } catch (error: any) {
+    log('Error fetching projects:', error.message);
+    return NextResponse.json(
+      { error: error.message || 'Failed to fetch projects' },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: Request) {
   try {
     const project = await request.json();
-    console.log('POST /api/admin/projects - Creating:', project.title);
+    log('POST /api/admin/projects - Creating:', project.title);
+
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      return NextResponse.json(
+        { error: 'Server misconfigured: Missing Supabase environment variables' },
+        { status: 500 }
+      );
+    }
 
     const images: ProjectImages = {
       thumbnail: project.thumbnail || null,
@@ -64,6 +106,8 @@ export async function POST(request: Request) {
       published_at: project.published ? new Date().toISOString() : null,
     };
 
+    log('Insert data:', JSON.stringify(insertData));
+
     const response = await supabaseFetch('/rest/v1/projects', {
       method: 'POST',
       body: JSON.stringify(insertData),
@@ -71,15 +115,21 @@ export async function POST(request: Request) {
 
     if (!response.ok) {
       const error = await response.text();
-      console.error('Supabase POST error:', response.status, error);
-      return NextResponse.json({ success: false, error: error }, { status: response.status });
+      log('Supabase POST error:', error);
+      return NextResponse.json(
+        { success: false, error: error },
+        { status: response.status }
+      );
     }
 
-    console.log('Project created successfully');
+    log('Project created successfully');
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error creating project:', error);
-    return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
+  } catch (error: any) {
+    log('Error creating project:', error.message);
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
   }
 }
 
@@ -91,7 +141,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ success: false, error: 'Project ID required' }, { status: 400 });
     }
 
-    console.log('PUT /api/admin/projects - Updating:', project.id);
+    log('PUT /api/admin/projects - Updating:', project.id);
 
     const images: ProjectImages = {
       thumbnail: project.thumbnail || null,
@@ -124,15 +174,15 @@ export async function PUT(request: Request) {
 
     if (!response.ok) {
       const error = await response.text();
-      console.error('Supabase PUT error:', response.status, error);
+      log('Supabase PUT error:', error);
       return NextResponse.json({ success: false, error: error }, { status: response.status });
     }
 
-    console.log('Project updated successfully');
+    log('Project updated successfully');
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error updating project:', error);
-    return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
+  } catch (error: any) {
+    log('Error updating project:', error.message);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
 
@@ -144,7 +194,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ success: false, error: 'Project ID required' }, { status: 400 });
     }
 
-    console.log('DELETE /api/admin/projects - Deleting:', id);
+    log('DELETE /api/admin/projects - Deleting:', id);
 
     const response = await supabaseFetch(
       `/rest/v1/projects?id=eq.${id}`,
@@ -153,14 +203,14 @@ export async function DELETE(request: Request) {
 
     if (!response.ok) {
       const error = await response.text();
-      console.error('Supabase DELETE error:', response.status, error);
+      log('Supabase DELETE error:', error);
       return NextResponse.json({ success: false, error: error }, { status: response.status });
     }
 
-    console.log('Project deleted successfully');
+    log('Project deleted successfully');
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting project:', error);
-    return NextResponse.json({ success: false, error: String(error) }, { status: 500 });
+  } catch (error: any) {
+    log('Error deleting project:', error.message);
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
