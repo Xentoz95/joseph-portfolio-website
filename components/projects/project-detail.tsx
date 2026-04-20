@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
-import { Play, X, ZoomIn, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Play, X, ZoomIn, ChevronLeft, ChevronRight, Maximize2, Minimize2 } from 'lucide-react';
 
 interface ProjectDetailProps {
   src: string;
@@ -16,6 +16,7 @@ interface ProjectDetailProps {
 export function ProjectDetail({ src, alt, title, allMedia = [], currentIndex = 0 }: ProjectDetailProps) {
   const [viewing, setViewing] = useState(false);
   const [mediaIndex, setMediaIndex] = useState(currentIndex);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const mediaItems = allMedia.length > 0 ? allMedia : [src];
 
@@ -108,7 +109,7 @@ export function ProjectDetail({ src, alt, title, allMedia = [], currentIndex = 0
 
       {/* Viewer Dialog */}
       <Dialog open={viewing} onOpenChange={setViewing}>
-        <DialogContent className="max-w-6xl max-h-[90vh] p-0 bg-black/95 border-none">
+        <DialogContent className={`${isFullscreen ? '!max-w-[100vw] !max-h-[100vh] !w-screen !h-screen' : 'max-w-6xl max-h-[90vh]'} p-0 bg-black/95 border-none`}>
           <DialogTitle className="sr-only">{title}</DialogTitle>
 
           {/* Close button */}
@@ -117,6 +118,14 @@ export function ProjectDetail({ src, alt, title, allMedia = [], currentIndex = 0
             className="absolute top-4 right-4 z-50 p-2 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
           >
             <X className="w-6 h-6" />
+          </button>
+
+          {/* Fullscreen toggle */}
+          <button
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            className="absolute top-4 right-16 z-50 p-2 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
+          >
+            {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
           </button>
 
           {/* Previous button */}
@@ -153,10 +162,10 @@ export function ProjectDetail({ src, alt, title, allMedia = [], currentIndex = 0
                 src={mediaItems[mediaIndex]}
                 controls
                 autoPlay
-                className="w-full h-full max-h-[85vh] object-contain"
+                className={`${isFullscreen ? 'w-screen h-screen' : 'w-full h-full max-h-[85vh]'} object-contain`}
               />
             ) : (
-              <div className="relative w-full h-full max-h-[85vh]">
+              <div className={`relative ${isFullscreen ? 'w-screen h-screen' : 'w-full h-full max-h-[85vh]'}`}>
                 <Image
                   src={mediaItems[mediaIndex]}
                   alt={alt}

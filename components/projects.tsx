@@ -42,10 +42,30 @@ export function Projects() {
   const [loading, setLoading] = useState(true);
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
   const [fullscreenIndex, setFullscreenIndex] = useState(0);
+  const [fullscreenGallery, setFullscreenGallery] = useState<string[]>([]);
+  const [fullscreenProjectTitle, setFullscreenProjectTitle] = useState('');
 
   useEffect(() => {
     fetchProjects();
   }, []);
+
+  // Keyboard navigation for fullscreen viewer
+  useEffect(() => {
+    if (!fullscreenImage) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        goToPreviousImage();
+      } else if (e.key === 'ArrowRight') {
+        goToNextImage();
+      } else if (e.key === 'Escape') {
+        setFullscreenImage(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [fullscreenImage, fullscreenGallery, fullscreenIndex]);
 
   const fetchProjects = async () => {
     try {
@@ -70,22 +90,37 @@ export function Projects() {
   // Get all thumbnails for navigation
   const allThumbnails = displayProjects.map(p => p.thumbnail).filter(Boolean);
 
-  const openFullscreen = (thumbnail: string) => {
-    const index = allThumbnails.indexOf(thumbnail);
+  const openFullscreen = (project: Project, thumbnail: string) => {
+    // Build gallery from project: thumbnail + hero + gallery images
+    const gallery: string[] = [];
+    if (project.thumbnail) gallery.push(project.thumbnail);
+    if (project.hero && project.hero !== project.thumbnail) gallery.push(project.hero);
+    if (project.gallery && project.gallery.length > 0) {
+      project.gallery.forEach(img => {
+        if (img && img !== project.thumbnail && img !== project.hero) {
+          gallery.push(img);
+        }
+      });
+    }
+    const index = gallery.indexOf(thumbnail);
+    setFullscreenGallery(gallery);
+    setFullscreenProjectTitle(project.title);
     setFullscreenIndex(index >= 0 ? index : 0);
     setFullscreenImage(thumbnail);
   };
 
   const goToPreviousImage = () => {
-    const newIndex = fullscreenIndex === 0 ? allThumbnails.length - 1 : fullscreenIndex - 1;
+    if (fullscreenGallery.length === 0) return;
+    const newIndex = fullscreenIndex === 0 ? fullscreenGallery.length - 1 : fullscreenIndex - 1;
     setFullscreenIndex(newIndex);
-    setFullscreenImage(allThumbnails[newIndex]);
+    setFullscreenImage(fullscreenGallery[newIndex]);
   };
 
   const goToNextImage = () => {
-    const newIndex = fullscreenIndex === allThumbnails.length - 1 ? 0 : fullscreenIndex + 1;
+    if (fullscreenGallery.length === 0) return;
+    const newIndex = fullscreenIndex === fullscreenGallery.length - 1 ? 0 : fullscreenIndex + 1;
     setFullscreenIndex(newIndex);
-    setFullscreenImage(allThumbnails[newIndex]);
+    setFullscreenImage(fullscreenGallery[newIndex]);
   };
 
   return (
@@ -138,7 +173,7 @@ export function Projects() {
               <FadeIn key={project.id} delay={index * 100}>
                 <div className="bg-background rounded-2xl overflow-hidden border border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:shadow-primary/20 group h-full flex flex-col">
                   {/* Image */}
-                  <div className="relative h-48 overflow-hidden cursor-zoom-in" onClick={() => { if (project.thumbnail) openFullscreen(project.thumbnail); }}>
+                  <div className="relative h-48 overflow-hidden cursor-zoom-in" onClick={() => { if (project.thumbnail) openFullscreen(project, project.thumbnail); }}>
                     <Image
                       src={project.thumbnail || '/images/placeholder.png'}
                       alt={project.alt || project.title}
@@ -250,7 +285,7 @@ export function Projects() {
           </button>
 
           {/* Previous button */}
-          {allThumbnails.length > 1 && (
+          {fullscreenGallery.length > 1 && (
             <button
               onClick={(e) => { e.stopPropagation(); goToPreviousImage(); }}
               className="absolute left-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
@@ -260,7 +295,7 @@ export function Projects() {
           )}
 
           {/* Next button */}
-          {allThumbnails.length > 1 && (
+          {fullscreenGallery.length > 1 && (
             <button
               onClick={(e) => { e.stopPropagation(); goToNextImage(); }}
               className="absolute right-4 top-1/2 -translate-y-1/2 z-50 p-3 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
@@ -270,9 +305,9 @@ export function Projects() {
           )}
 
           {/* Counter */}
-          {allThumbnails.length > 1 && (
+          {fullscreenGallery.length > 1 && (
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-2 bg-black/50 rounded-full text-white text-sm">
-              {fullscreenIndex + 1} / {allThumbnails.length}
+              {fullscreenIndex + 1} / {fullscreenGallery.length}
             </div>
           )}
 
