@@ -2,7 +2,7 @@
  * Type definitions for portfolio website data structures
  */
 
-export type ProjectCategory = 'web' | 'system' | 'dashboard' | 'design' | 'mobile';
+export type ProjectCategory = 'web' | 'system' | 'dashboard' | 'design' | 'mobile' | 'branding' | 'video';
 
 export interface ProjectImages {
   thumbnail: string;
@@ -26,10 +26,12 @@ export interface Project {
   category: ProjectCategory;
   tags: string[];
   images: ProjectImages;
-  links?: ProjectLinks;
-  client?: string;
-  year?: number;
   featured?: boolean;
+  technologies?: string[];
+  liveUrl?: string;
+  githubUrl?: string;
+  published?: boolean;
+  caseStudy?: string;
 }
 
 export interface SkillCategory {

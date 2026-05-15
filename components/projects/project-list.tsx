@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ExternalLink, Github, Play, X, ZoomIn, ChevronLeft, ChevronRight } from 'lucide-react';
-import type { Project as DbProject, ProjectImages } from '@/types/database';
+import { ExternalLink, Github, Play, X, ZoomIn, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
+import type { Project as DbProject } from '@/types/database';
 
 interface ProjectImages {
   thumbnail: string | null;
@@ -80,6 +80,8 @@ export function ProjectList({ projects }: ProjectListProps) {
   const [viewingMedia, setViewingMedia] = useState<MediaItem | null>(null);
   const [mediaIndex, setMediaIndex] = useState(0);
   const [currentProjectMedia, setCurrentProjectMedia] = useState<MediaItem[]>([]);
+  const mediaViewerRef = useRef<HTMLDivElement>(null);
+  const mediaContentRef = useRef<HTMLDivElement>(null);
 
   // Adapt all projects to component format
   const adaptedProjects = projects.map(adaptProject);
@@ -136,6 +138,20 @@ export function ProjectList({ projects }: ProjectListProps) {
     setViewingMedia(currentProjectMedia[newIndex]);
   }, [mediaIndex, currentProjectMedia]);
 
+  const toggleFullscreen = useCallback(async () => {
+    if (!mediaViewerRef.current) return;
+
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      } else {
+        await mediaViewerRef.current.requestFullscreen();
+      }
+    } catch (err) {
+      console.warn('Fullscreen request failed:', err);
+    }
+  }, []);
+
   // Handle keyboard navigation
   useEffect(() => {
     if (!viewingMedia) return;
@@ -147,12 +163,14 @@ export function ProjectList({ projects }: ProjectListProps) {
         goToNext();
       } else if (e.key === 'Escape') {
         setViewingMedia(null);
+      } else if (e.key === 'f' || e.key === 'F') {
+        toggleFullscreen();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [viewingMedia, goToPrevious, goToNext]);
+  }, [viewingMedia, goToPrevious, goToNext, toggleFullscreen]);
 
   if (adaptedProjects.length === 0) {
     return (
@@ -191,13 +209,21 @@ export function ProjectList({ projects }: ProjectListProps) {
                 </>
               ) : project.thumbnail ? (
                 <>
-                  <Image
-                    src={project.thumbnail}
-                    alt={project.alt || project.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
+                  {project.thumbnail.includes('cloudinary.com') || project.thumbnail.startsWith('http') ? (
+                    <img
+                      src={project.thumbnail}
+                      alt={project.alt || project.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <Image
+                      src={project.thumbnail}
+                      alt={project.alt || project.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-4">
                     <span className="flex items-center gap-2 text-white text-sm font-medium">
                       <ZoomIn className="w-4 h-4" />
@@ -289,7 +315,8 @@ export function ProjectList({ projects }: ProjectListProps) {
       {/* Fullscreen Media Viewer */}
       {viewingMedia && (
         <div
-          className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4"
+          ref={mediaViewerRef}
+          className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center p-4"
           onClick={() => setViewingMedia(null)}
         >
           {/* Close button */}
@@ -299,6 +326,17 @@ export function ProjectList({ projects }: ProjectListProps) {
           >
             <X className="w-6 h-6" />
           </button>
+
+          {/* Fullscreen toggle button (for images) */}
+          {viewingMedia.type === 'image' && (
+            <button
+              onClick={(e) => { e.stopPropagation(); toggleFullscreen(); }}
+              className="absolute top-4 right-16 z-50 p-2 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"
+              title="Toggle Fullscreen (F)"
+            >
+              <Maximize2 className="w-5 h-5" />
+            </button>
+          )}
 
           {/* Navigation - Previous */}
           {currentProjectMedia.length > 1 && (
@@ -328,24 +366,30 @@ export function ProjectList({ projects }: ProjectListProps) {
           )}
 
           {/* Media Content */}
-          {viewingMedia && viewingMedia.src && (
-            viewingMedia.type === 'video' ? (
-              <video
-                src={viewingMedia.src}
-                controls
-                autoPlay
-                className="max-w-full max-h-[90vh] object-contain"
-                onClick={(e) => e.stopPropagation()}
-              />
-            ) : (
-              <img
-                src={viewingMedia.src}
-                alt={viewingMedia.title || ''}
-                className="max-w-full max-h-[90vh] object-contain"
-                onClick={(e) => e.stopPropagation()}
-              />
-            )
-          )}
+          <div ref={mediaContentRef} className="max-w-full max-h-[90vh] flex items-center justify-center">
+            {viewingMedia && viewingMedia.src && (
+              viewingMedia.type === 'video' ? (
+                <video
+                  src={viewingMedia.src}
+                  controls
+                  autoPlay
+                  className="max-w-full max-h-[85vh] object-contain"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              ) : (
+                <img
+                  src={viewingMedia.src}
+                  alt={viewingMedia.title || ''}
+                  className="max-w-full max-h-[90vh] object-contain cursor-zoom-out"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Open image in new tab for native fullscreen
+                    window.open(viewingMedia.src, '_blank');
+                  }}
+                />
+              )
+            )}
+          </div>
         </div>
       )}
     </>

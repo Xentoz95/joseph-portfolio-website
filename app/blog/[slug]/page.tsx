@@ -10,7 +10,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getPostBySlug, getRelatedPosts } from '@/lib/supabase/posts';
-import { MarkdownRenderer, calculateReadingTime } from '@/components/blog/markdown-renderer';
+import { MarkdownRenderer } from '@/components/blog/markdown-renderer';
+import { calculateReadingTime } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Calendar, Clock, User } from 'lucide-react';
@@ -18,6 +19,7 @@ import { buildCloudinaryUrl } from '@/lib/cloudinary-helpers';
 import { ArticleSchema, BreadcrumbListSchema } from '@/lib/seo/json-ld';
 import { Breadcrumb } from '@/components/seo/breadcrumb';
 import { Header } from '@/components/header';
+import { ProjectDetail } from '@/components/projects/project-detail';
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -201,16 +203,12 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
       {coverImageSrc && (
         <section className="py-8 px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto">
-            <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-muted">
-              <Image
-                src={coverImageSrc}
-                alt={post.title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 896px"
-                priority
-              />
-            </div>
+            <ProjectDetail
+              src={coverImageSrc}
+              alt={post.title}
+              title={post.title}
+              allMedia={coverImageSrc ? [coverImageSrc] : []}
+            />
           </div>
         </section>
       )}

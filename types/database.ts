@@ -15,7 +15,7 @@ export type Json =
 // DATABASE TYPE DEFINITIONS
 // ============================================
 
-export type ProjectCategory = 'web' | 'system' | 'dashboard' | 'design' | 'mobile';
+export type ProjectCategory = 'web' | 'system' | 'dashboard' | 'design' | 'mobile' | 'branding' | 'video';
 
 export interface ProjectImages {
   thumbnail: string | null

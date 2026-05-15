@@ -37,43 +37,30 @@ async function getFallbackPosts(): Promise<Post[]> {
  */
 const FALLBACK_POSTS_STATIC: Post[] = [
   {
-    id: '1',
-    title: 'Getting Started with Modern Web Development',
-    slug: 'getting-started-with-modern-web-development',
-    content: '# Introduction\n\nWeb development has evolved significantly over the years. Today, we have access to powerful tools and frameworks that make building modern web applications easier than ever.\n\n## The Modern Stack\n\nWhen starting a new project, choosing the right stack is crucial. Here are some considerations:\n\n- **React** for component-based UI\n- **Next.js** for server-side rendering and routing\n- **TypeScript** for type safety\n- **Tailwind CSS** for rapid styling\n- **Supabase** for backend and database\n\n## Getting Started\n\nFirst, create a new Next.js project:\n\n```bash\nnpx create-next-app@latest my-app\ncd my-app\nnpm run dev\n```\n\n## Conclusion\n\nThis is just the beginning of your web development journey. Keep learning and building!',
-    excerpt: 'Learn about the modern web development stack including React, Next.js, TypeScript, and more. This guide covers everything you need to get started.',
-    cover_image: '/images/projects/fintech-ui-system/hero.svg',
-    tags: ['Web Development', 'React', 'Next.js', 'Tutorial'],
+    id: 'post-1776452321992',
+    title: 'its a monday',
+    slug: 'its-a-monday',
+    content: "It's a Monday just uh trying to keep my mind busy",
+    excerpt: 'This is me creating a poster of Monday just still training myself on how to do graphics more more better off',
+    cover_image: 'https://res.cloudinary.com/dszboz3se/image/upload/v1776453365/portfolio/media/vka2bsksz6381n3ouog2.jpg',
+    tags: ['Graphics', 'Design', 'Learning'],
     published: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    published_at: new Date().toISOString()
+    created_at: '2026-04-17T18:58:41.992Z',
+    updated_at: '2026-04-17T19:00:51.404Z',
+    published_at: '2026-04-17T18:58:41.992Z'
   },
   {
-    id: '2',
-    title: 'Mastering TypeScript for React Applications',
-    slug: 'mastering-typescript-for-react',
-    content: '# Why TypeScript?\n\nTypeScript brings type safety to JavaScript, making your React applications more robust and easier to maintain.\n\n## Key Benefits\n\n1. **Type Safety** - Catch errors at compile time\n2. **Better IDE Support** - Autocomplete and inline documentation\n3. **Refactoring** - Make changes with confidence\n\n## Getting Started\n\n```tsx\ninterface ButtonProps {\n  label: string;\n  onClick: () => void;\n  variant?: "primary" | "secondary";\n}\n\nfunction Button({ label, onClick, variant = "primary" }: ButtonProps) {\n  return <button onClick={onClick}>{label}</button>;\n}\n```\n\nStart small and gradually add types to your existing React projects!',
-    excerpt: 'Discover how TypeScript can improve your React applications with type safety, better IDE support, and easier refactoring.',
-    cover_image: '/images/projects/hr-management-system/hero.svg',
-    tags: ['TypeScript', 'React', 'Web Development'],
+    id: 'post-1776671972028',
+    title: 'meee',
+    slug: 'meee',
+    content: 'my brand',
+    excerpt: 'my brand',
+    cover_image: 'https://res.cloudinary.com/dszboz3se/image/upload/v1776671988/portfolio/media/dzzg5sphduqtgkkmxs1x.png',
+    tags: ['Brand', 'Personal'],
     published: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    published_at: new Date().toISOString()
-  },
-  {
-    id: '3',
-    title: 'Building Scalable Applications with Next.js',
-    slug: 'building-scalable-applications-with-nextjs',
-    content: '# Next.js: The React Framework for Production\n\nNext.js provides a complete solution for building modern web applications with React.\n\n## Key Features\n\n- **Server-Side Rendering** - Better SEO and performance\n- **Static Site Generation** - Pre-render pages at build time\n- **API Routes** - Build API endpoints alongside your pages\n- **File-based Routing** - Simple and intuitive routing\n\n## Project Structure\n\n```\napp/\n├── page.tsx          # Homepage\n├── about/\n│   └── page.tsx      # About page\n└── blog/\n    ├── page.tsx      # Blog listing\n│   └── [slug]/\n│       └── page.tsx  # Blog post detail\n```\n\n## Deployment\n\nDeploy your Next.js application to Vercel with a single command:\n\n```bash\nvercel deploy\n```\n\nYour app will be live in seconds!',
-    excerpt: 'Learn how to build production-ready applications with Next.js, featuring SSR, SSG, API routes, and more.',
-    cover_image: '/images/projects/ecommerce-dashboard/hero.svg',
-    tags: ['Next.js', 'React', 'Web Development', 'Deployment'],
-    published: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-    published_at: new Date().toISOString()
+    created_at: '2026-04-20T07:59:32.028Z',
+    updated_at: '2026-04-20T08:00:15.884Z',
+    published_at: '2026-04-20T07:59:32.028Z'
   }
 ];
 
@@ -169,34 +156,61 @@ export async function getPostBySlug(slug: string): Promise<Post | null> {
 }
 
 /**
+ * Check if Supabase is configured
+ */
+function isSupabaseConfigured(): boolean {
+  return !!(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY &&
+    process.env.NEXT_PUBLIC_SUPABASE_URL !== 'your-project-url' &&
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY !== 'your-anon-key'
+  );
+}
+
+/**
  * Get all unique tags from posts
  *
  * @returns Array of unique tags
  */
 export async function getAllPostTags(): Promise<string[]> {
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
-    .from('posts')
-    .select('tags')
-    .eq('published', true)
-    .not('published_at', 'is', null);
-
-  if (error) {
-    console.error('Error fetching post tags:', error);
-    return [];
+  if (!isSupabaseConfigured()) {
+    const fallbackPosts = await getFallbackPosts();
+    const allTags = fallbackPosts.flatMap((post) => post.tags || []) as string[];
+    return Array.from(new Set(allTags)).sort() as string[];
   }
 
-  if (!data) {
-    return [];
+  try {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from('posts')
+      .select('tags')
+      .eq('published', true)
+      .not('published_at', 'is', null);
+
+    if (error) {
+      console.warn('Error fetching post tags, using fallback:', error);
+      const fallbackPosts = await getFallbackPosts();
+      const allTags = fallbackPosts.flatMap((post) => post.tags || []) as string[];
+      return Array.from(new Set(allTags)).sort() as string[];
+    }
+
+    if (!data) {
+      return [];
+    }
+
+    // Extract and flatten all tags, then deduplicate
+    const posts = data as Post[];
+    const allTags = posts.flatMap((post) => post.tags || []) as string[];
+    const uniqueTags = Array.from(new Set(allTags)).sort() as string[];
+
+    return uniqueTags;
+  } catch (error) {
+    console.warn('Error fetching post tags, using fallback:', error);
+    const fallbackPosts = await getFallbackPosts();
+    const allTags = fallbackPosts.flatMap((post) => post.tags || []) as string[];
+    return Array.from(new Set(allTags)).sort() as string[];
   }
-
-  // Extract and flatten all tags, then deduplicate
-  const posts = data as Post[];
-  const allTags = posts.flatMap((post) => post.tags || []) as string[];
-  const uniqueTags = Array.from(new Set(allTags)).sort() as string[];
-
-  return uniqueTags;
 }
 
 /**
@@ -283,29 +297,43 @@ export async function getRelatedPosts(
     return [];
   }
 
-  const supabase = await createClient();
-
-  // Get posts with matching tags
-  const { data, error } = await supabase
-    .from('posts')
-    .select('*')
-    .eq('published', true)
-    .not('published_at', 'is', null)
-    .neq('slug', currentSlug)
-    .contains('tags', tags)
-    .order('published_at', { ascending: false })
-    .limit(limit);
-
-  if (error) {
-    console.error(`Error fetching related posts for "${currentSlug}":`, error);
-    // Fallback to local JSON
+  if (!isSupabaseConfigured()) {
     const fallbackPosts = await getFallbackPosts();
     return fallbackPosts
       .filter(p => p.slug !== currentSlug && p.published)
       .slice(0, limit);
   }
 
-  return (data || []) as Post[];
+  try {
+    const supabase = await createClient();
+
+    // Get posts with matching tags
+    const { data, error } = await supabase
+      .from('posts')
+      .select('*')
+      .eq('published', true)
+      .not('published_at', 'is', null)
+      .neq('slug', currentSlug)
+      .contains('tags', tags)
+      .order('published_at', { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      console.warn(`Error fetching related posts for "${currentSlug}", using fallback:`, error);
+      const fallbackPosts = await getFallbackPosts();
+      return fallbackPosts
+        .filter(p => p.slug !== currentSlug && p.published)
+        .slice(0, limit);
+    }
+
+    return (data || []) as Post[];
+  } catch (error) {
+    console.warn(`Error fetching related posts for "${currentSlug}", using fallback:`, error);
+    const fallbackPosts = await getFallbackPosts();
+    return fallbackPosts
+      .filter(p => p.slug !== currentSlug && p.published)
+      .slice(0, limit);
+  }
 }
 
 /**

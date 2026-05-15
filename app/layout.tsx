@@ -73,6 +73,11 @@ export const metadata: Metadata = {
     apple: '/apple-icon.png',
   },
   metadataBase: new URL('https://josephthuo.com'),
+  alternates: {
+    types: {
+      'application/rss+xml': '/blog/rss',
+    },
+  },
 }
 
 export default function RootLayout({
