@@ -26,11 +26,14 @@ export function Header() {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex gap-1">
-          <Link href="/#about" className="px-3 py-1.5 text-sm text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-150">
+          <Link href="/about" className="px-3 py-1.5 text-sm text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-150">
             About
           </Link>
-          <Link href="/#skills" className="px-3 py-1.5 text-sm text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-150">
+          <Link href="/skills" className="px-3 py-1.5 text-sm text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-150">
             Skills
+          </Link>
+          <Link href="/testimonials" className="px-3 py-1.5 text-sm text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-150">
+            Testimonials
           </Link>
           <Link href="/learning" className="px-3 py-1.5 text-sm text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-150">
             Learning
@@ -38,7 +41,7 @@ export function Header() {
           <Link href="/projects" className="px-3 py-1.5 text-sm text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-150">
             Projects
           </Link>
-          <Link href="/#services" className="px-3 py-1.5 text-sm text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-150">
+          <Link href="/services" className="px-3 py-1.5 text-sm text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-150">
             Services
           </Link>
           <Link href="/contact" className="px-3 py-1.5 text-sm text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-150">
@@ -70,11 +73,14 @@ export function Header() {
         {isOpen && (
           <div className="absolute top-16 left-0 right-0 bg-background/95 backdrop-blur-sm border-b border-border/50 md:hidden">
             <div className="flex flex-col gap-1 p-4">
-              <Link href="/#about" onClick={() => setIsOpen(false)} className="px-4 py-3 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-150">
+              <Link href="/about" onClick={() => setIsOpen(false)} className="px-4 py-3 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-150">
                 About
               </Link>
-              <Link href="/#skills" onClick={() => setIsOpen(false)} className="px-4 py-3 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-150">
+              <Link href="/skills" onClick={() => setIsOpen(false)} className="px-4 py-3 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-150">
                 Skills
+              </Link>
+              <Link href="/testimonials" onClick={() => setIsOpen(false)} className="px-4 py-3 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-150">
+                Testimonials
               </Link>
               <Link href="/learning" onClick={() => setIsOpen(false)} className="px-4 py-3 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-150">
                 Learning
@@ -82,7 +88,7 @@ export function Header() {
               <Link href="/projects" onClick={() => setIsOpen(false)} className="px-4 py-3 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-150">
                 Projects
               </Link>
-              <Link href="/#services" onClick={() => setIsOpen(false)} className="px-4 py-3 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-150">
+              <Link href="/services" onClick={() => setIsOpen(false)} className="px-4 py-3 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-150">
                 Services
               </Link>
               <Link href="/contact" onClick={() => setIsOpen(false)} className="px-4 py-3 text-foreground/90 hover:text-primary hover:bg-primary/10 rounded-lg transition-all duration-150">
